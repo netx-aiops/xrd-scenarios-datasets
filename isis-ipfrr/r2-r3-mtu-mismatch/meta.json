@@ -1,0 +1,33 @@
+{
+  "profile": "isis-ipfrr",
+  "scenario": "r2-r3-mtu-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 lowers MTU on GigabitEthernet0/0/0/0 (R2↔R3 primary path) from 1514\nto 1400. R3 stays at default. IS-IS CSNP/PSNP packets sized for the\nlarger LSP-MTU can no longer be reassembled across the link; IS-IS\nadjacency stalls in INIT and never reaches UP. The lab fails over to\nthe backup path R2→R6→R7→R4 (metric 60). Classic \"IGP stuck with link\nup and pings working\" production fault.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 primary path) was lowered to 1400 while R3 stays at 1514.\nThe asymmetric MTU means the oversize LSP/CSNP exchange cannot complete across the link, so the IS-IS link-state databases cannot synchronize and the adjacency cannot reach full operation. As a result the primary path is unusable for IS-IS and traffic to R4 routes over the backup R2->R6->R7->R4 path (metric 60).\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; small IS-IS\nhello PDUs may still cross the asymmetric MTU and keep the adjacency\nUp, while large LSP/CSNP exchange fails. Diagnostic ground truth\nlives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R2 `show interfaces GigabitEthernet0/0/0/0`: MTU 1400 (baseline: 1514). R3's Gi0/0/0/0: still default — asymmetric L3 MTU on the R2-R3 primary.",
+    "R2 `show running-config interface GigabitEthernet0/0/0/0`: `mtu 1400` line present (baseline: line absent).",
+    "Any router `ping <R3-loopback> source Loopback0 size 1500`: fragmentation-needed / drops; `size 1000`: succeeds — asymmetric MTU breaks large-packet traversal.",
+    "R2 `show isis interface GigabitEthernet0/0/0/0`: per-interface state may flag MTU mismatch; full-size LSP exchange from R3 is dropped on R2.",
+    "R2 `show route 192.0.2.4` (R4 loopback): if the LSP exchange is impaired, the path may shift to the backup R6→R7 with higher metric (~60) instead of the primary R2-R3-R4 path."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n mtu 1400\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n no mtu\n"
+    }
+  ],
+  "expected_symptoms": []
+}

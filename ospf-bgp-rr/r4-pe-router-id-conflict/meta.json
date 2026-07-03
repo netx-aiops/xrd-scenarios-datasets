@@ -1,0 +1,33 @@
+{
+  "profile": "ospf-bgp-rr",
+  "scenario": "r4-pe-router-id-conflict",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R4 changes its `bgp router-id` from 192.0.2.4 to 192.0.2.3 — the same\nrouter-id used by R3 (the primary RR). BGP OPEN packets from R4 now\nadvertise router-id 192.0.2.3. R3 receives an OPEN claiming its own\nrouter-id → rejects with \"Bad BGP Identifier\" NOTIFICATION (RFC 4271\n§6.2). R4's session to R3 fails. R4's session to R7 also fails since\nR7 already learned R3 as 192.0.2.3 from prior iBGP and now sees a\nconflicting peer claiming the same identifier.",
+  "target_routers": [
+    "R4"
+  ],
+  "expected_rca": "Root cause: on R4 (PE2), bgp router-id was changed to 192.0.2.3 - the same router-id already used by R3 (primary RR).\nBGP requires each peer's identifier to be unique; R4's BGP OPEN now advertises 192.0.2.3, which collides with R3's own identifier on the R4-R3 session and with the 192.0.2.3 R7 already associates with R3 on the R4-R7 session. The duplicate-identifier invariant is violated on both sessions, so neither iBGP session can be established and no routes are exchanged across them, partitioning R4 from both route reflectors.\nFix: set R4's bgp router-id back to 192.0.2.4 so its identifier is unique again.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R3: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.3.\n- R4: neighbor 192.0.2.7.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R4 (2 instances):\n- R4: Changed state to NSR-Ready\n- R4: Changed state to Not NSR-Ready",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nrouter bgp 65000\nbgp router-id 192.0.2.3\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nrouter bgp 65000\nbgp router-id 192.0.2.4\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:33:35.960 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Down - Peer closing down the session (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:33:35.959 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Down - Router ID changed (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:33:35.959 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.7 Down - Router ID changed (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:33:35.960 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to NSR-Ready",
+    "RP/0/RP0/CPU0:May 17 13:33:59.537 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready"
+  ]
+}

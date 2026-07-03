@@ -1,0 +1,31 @@
+{
+  "profile": "ospf-bgp-rr",
+  "scenario": "r3-rr-no-rr-client-r4",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 re-points R4 from the RR-CLIENT neighbor-group to RR-PEER. R3 no\nlonger treats R4 as a client, so R3 stops reflecting R4-originated\nprefixes to R2 and R6. R4 still reaches R7 (secondary RR, which keeps\nR4 as RR-CLIENT), so prefix flow survives via R7. The asymmetry is\nsubtle and silently halves redundancy: if R7 is rebooted, R4's prefixes\nvanish from the AS.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3 (primary RR), the R4 neighbor was moved from the RR-CLIENT neighbor-group to RR-PEER, so R3 no longer treats R4 as a route-reflector client.\nA route reflector only re-advertises prefixes learned from its clients, so once R4 is a plain peer R3 stops reflecting R4-originated prefixes to its other clients (R2, R6); R4 still reaches R7 (secondary RR, which keeps R4 as a client), so prefix flow survives but redundancy is silently halved - if R7 bounces, R4's prefixes vanish from the AS.\nFix: move R4 back to the RR-CLIENT neighbor-group on R3.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R3: neighbor 192.0.2.4.\n- R3: neighbor 192.0.2.4.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.4\n no use neighbor-group RR-CLIENT\n use neighbor-group RR-PEER\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.4\n no use neighbor-group RR-PEER\n use neighbor-group RR-CLIENT\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:31:10.746 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:30:16.534 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Down - RR client configuration changed (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:30:21.320 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Up (VRF: default) (AS: 65000)"
+  ]
+}

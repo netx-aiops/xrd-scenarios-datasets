@@ -1,0 +1,32 @@
+{
+  "profile": "srv6-l3vpn",
+  "scenario": "r2-r3-mtu-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 lowers MTU on GigabitEthernet0/0/0/0 (R2↔R3 IPv6 core) from 1514\nto 1400. R3 stays at default. IS-IS IPv6 DBD/LSP exchange fails for\noversize packets; adjacency stalls in INIT. SRv6 underlay reachability\nbetween PE1 and PE2 breaks. VPNv4 iBGP over IPv6 drops once the IGP\nno longer carries fc00::4.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 IPv6 core) was lowered to 1400 while R3 stays at 1514.\nThe asymmetric L3 MTU means oversize IS-IS IPv6 DBD/LSP packets cannot traverse the link, so the two ends cannot complete database synchronization and the IS-IS adjacency cannot form. Without the adjacency the SRv6 underlay between PE1 and PE2 has no reachability, and once the IGP no longer carries fc00::4 the VPNv4-over-IPv6 iBGP session cannot stay up, so VPN prefixes stop propagating.\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; the\ndiagnostic ground truth lives in expected_state_diffs (CLI\nprobe outputs the agent should observe).",
+  "expected_state_diffs": [
+    "R2 `show interfaces GigabitEthernet0/0/0/0`: MTU 1400 (baseline: 1514). R3's Gi0/0/0/0: still default — asymmetric L3 MTU on a point-to-point link.",
+    "R2 `show isis interface GigabitEthernet0/0/0/0`: per-interface state may flag MTU mismatch; full-size IS-IS LSPs from R3 are dropped by R2.",
+    "Any router `ping ipv6 fc00::3 source Loopback0 size 1500`: fragmentation-needed / drops, while `size 1000` succeeds — asymmetric MTU breaks large-packet traversal across this link.",
+    "Diff `show running-config interface GigabitEthernet0/0/0/0` between R2 and R3: only R2 carries the lowered MTU."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n mtu 1400\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n no mtu\n"
+    }
+  ],
+  "expected_symptoms": []
+}

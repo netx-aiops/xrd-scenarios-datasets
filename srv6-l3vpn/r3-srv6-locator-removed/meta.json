@@ -1,0 +1,32 @@
+{
+  "profile": "srv6-l3vpn",
+  "scenario": "r3-srv6-locator-removed",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 (P1) removes its SRv6 locator `TRANSIT` (prefix fcbb:bb00:3::/48).\nR3 stops being a transit node for SRv6 End/End.X functions. The R3\nprefix fcbb:bb00:3::/48 is no longer advertised; the IS-IS LSP\nLocator-TLV for TRANSIT disappears. Other PEs/Ps relying on R3 as a\nTRANSIT hop in SR policies lose intermediate SIDs. Pure SRv6\nunderlay → plain IPv6 IS-IS still works for VPNv4 next-hop reachability,\nbut any SR-TE policy through R3 breaks.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3 (P1), the SRv6 locator TRANSIT (prefix fcbb:bb00:3::/48) was removed, so R3 stops advertising the locator prefix and its IS-IS Locator-TLV disappears; R3 no longer offers End/End.X transit SIDs.\nSR policies relying on R3 as a TRANSIT hop lose their intermediate SIDs, while plain IPv6 IS-IS forwarding (and thus VPNv4 next-hop reachability) still works.\nFix: re-create the SRv6 locator TRANSIT (prefix fcbb:bb00:3::/48) and re-bind it under R3's IS-IS IPv6 AF.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; SRv6\nlocator removal is a quiet config event. The underlay impact is\nvisible via CLI probe. Diagnostic ground truth lives in\nexpected_state_diffs.",
+  "expected_state_diffs": [
+    "R3 `show segment-routing srv6 locator`: TRANSIT entry absent (baseline: `TRANSIT  fcbb:bb00:3::/48`).",
+    "R3 `show running-config segment-routing srv6 locators`: TRANSIT block removed. Other PEs still advertise their own locators (R2: PE1, R4: PE2).",
+    "R2 and R4 `show isis database verbose` (R3's LSPID): no Locator sub-TLV for TRANSIT in R3's IS-IS LSP.",
+    "R2 `show route ipv6 fcbb:bb00:3::/48`: Network not in table — the TRANSIT locator prefix is no longer advertised."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter isis core\n address-family ipv6 unicast\n  segment-routing srv6\n   no locator TRANSIT\n!\nsegment-routing\n srv6\n  locators\n   no locator TRANSIT\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nsegment-routing\n srv6\n  locators\n   locator TRANSIT\n    micro-segment behavior unode psp-usd\n    prefix fcbb:bb00:3::/48\n!\nrouter isis core\n address-family ipv6 unicast\n  segment-routing srv6\n   locator TRANSIT\n"
+    }
+  ],
+  "expected_symptoms": []
+}

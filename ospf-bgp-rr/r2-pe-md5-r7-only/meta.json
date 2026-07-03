@@ -1,0 +1,38 @@
+{
+  "profile": "ospf-bgp-rr",
+  "scenario": "r2-pe-md5-r7-only",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 (PE1) adds a TCP-MD5 password to its iBGP neighbor toward R7\n(secondary RR) but not toward R3 (primary RR). R7 has no password\nconfigured. The TCP layer drops the segments; R2-R7 BGP session never\ncomes up. R2-R3 session is fine. Customer-facing impact: zero — the\nprimary RR carries all the load. The fault is invisible until R3 is\nrebooted or its session bounces.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2 (PE1), a TCP-MD5 password was added to the iBGP neighbor toward R7 (secondary RR) but not toward R3, while R7 has no password.\nBecause one end authenticates the TCP segments and the other does not, the two ends disagree on TCP-MD5 and the underlying TCP connection cannot be established, so the R2<->R7 BGP session cannot come up and no routes are exchanged over it; the R2<->R3 session to the primary RR is unaffected, so prefix flow continues and there is no customer impact until R3 bounces.\nFix: remove the password from R2's R7 neighbor.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R3: neighbor 192.0.2.2.\n- R3: neighbor 192.0.2.7.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R2, R3, R4 (3 instances):\n- R2: Changed state to Not NSR-Ready\n- R3: Changed state to Not NSR-Ready\n- R4: Changed state to Not NSR-Ready\n\n%IP-TCP-3-BADAUTH reported by R2 (2 instances):\n- R2: Invalid MD5 digest from 192.0.2.7:24162 to 192.0.2.2:179 for vrf:default (0x60000000)\n- R2: Invalid MD5 digest from 192.0.2.7:24162 to 192.0.2.2:179 for vrf:default (0x60000000)\n\n%IP-TCP-3-NOAUTH reported by R7 (2 instances):\n- R7: Authentication info not programmed for the packet received from 192.0.2.2:15835 to 192.0.2.7:179\n- R7: Authentication info not programmed for the packet received from 192.0.2.2:15835 to 192.0.2.7:179",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.7\n password clear secret\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.7\n no password\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:26:02.892 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:26:02.895 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:26:06.191 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.7 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:26:02.894 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready",
+    "RP/0/RP0/CPU0:May 17 13:26:02.897 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready",
+    "RP/0/RP0/CPU0:May 17 13:26:10.014 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready",
+    "RP/0/RP0/CPU0:May 17 13:26:05.641 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.7:24162 to 192.0.2.2:179 for vrf:default (0x60000000)",
+    "RP/0/RP0/CPU0:May 17 13:26:19.638 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.7:24162 to 192.0.2.2:179 for vrf:default (0x60000000)",
+    "RP/0/RP0/CPU0:May 17 13:26:11.674 UTC: tcp[193]: %IP-TCP-3-NOAUTH : Authentication info not programmed for the packet received from 192.0.2.2:15835 to 192.0.2.7:179",
+    "RP/0/RP0/CPU0:May 17 13:26:25.678 UTC: tcp[193]: %IP-TCP-3-NOAUTH : Authentication info not programmed for the packet received from 192.0.2.2:15835 to 192.0.2.7:179"
+  ]
+}

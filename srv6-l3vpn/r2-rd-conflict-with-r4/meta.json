@@ -1,0 +1,48 @@
+{
+  "profile": "srv6-l3vpn",
+  "scenario": "r2-rd-conflict-with-r4",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 (PE1) brings up a SECOND VRF — CUSTOMER_DUP — with\nroute-distinguisher `100:2`, the same RD already used by R4 (PE2)\nfor its CUSTOMER VRF. R2's existing CUSTOMER VRF stays at rd 100:1\nunchanged. Two PEs now originate VPNv4 routes under rd 100:2:\nR2/CUSTOMER_DUP advertises 10.99.0.0/24 and R4/CUSTOMER advertises\nits customer prefixes. CUSTOMER_DUP's route-target (100:1) matches\nthe baseline CUSTOMER RT, so the duplicate-rd routes import into\nevery PE holding VRF CUSTOMER. Receivers see two PE-sources for\nrd 100:2 and best-path becomes ambiguous.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2 (PE1), a second VRF CUSTOMER_DUP was created with route-distinguisher 100:2 - the same RD already used by R4 (PE2) for its CUSTOMER VRF - and route-target 100:1, which matches the baseline CUSTOMER RT.\nTwo PEs now originate VPNv4 routes under rd 100:2 (R2 advertising 10.99.0.0/24, R4 its customer prefixes) and both import into every CUSTOMER VRF, so receivers see two PE sources for rd 100:2 and best-path selection becomes ambiguous. This is a silent static misconfig with no control-plane event.\nFix: remove the CUSTOMER_DUP VRF and its BGP / static configuration on R2.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario. The\nfault is a static RD-conflict misconfiguration with no\ncontrol-plane event; ground truth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R2 `show running-config router bgp 100 | section vrf`: TWO vrf blocks — CUSTOMER (rd 100:1, baseline) and CUSTOMER_DUP (rd 100:2 — duplicates R4's RD).",
+    "R2 `show running-config vrf CUSTOMER_DUP`: import/export route-target 100:1 (matches CUSTOMER, so the duplicate-rd routes import into CUSTOMER on every remote PE).",
+    "R4 `show bgp vpnv4 unicast rd 100:2`: includes 10.99.0.0/24 advertised via fc00::2 (R2) in addition to R4's own CUSTOMER prefixes (10.1.4.0/31, 10.20.0.5/32). Two PE-sources claim rd 100:2.",
+    "Every other PE: `show running-config router bgp 100 | section vrf` reveals exactly one VRF per PE EXCEPT R2, which now has two. Per-PE-per-VRF RD reservation is violated only on R2."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nvrf CUSTOMER_DUP\n address-family ipv4 unicast\n  import route-target\n   100:1\n  !\n  export route-target\n   100:1\n  !\n !\n!\n"
+    },
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter static\n vrf CUSTOMER_DUP\n  address-family ipv4 unicast\n   10.99.0.0/24 Null0\n"
+    },
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\n vrf CUSTOMER_DUP\n  rd 100:2\n  address-family ipv4 unicast\n   redistribute static\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\n no vrf CUSTOMER_DUP\n"
+    },
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter static\n no vrf CUSTOMER_DUP\n"
+    },
+    {
+      "device": "R2",
+      "commands": "configure terminal\nno vrf CUSTOMER_DUP\n"
+    }
+  ],
+  "expected_symptoms": []
+}

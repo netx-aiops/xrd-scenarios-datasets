@@ -1,0 +1,33 @@
+{
+  "profile": "segment-routing",
+  "scenario": "r2-r3-mtu-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 lowers MTU on GigabitEthernet0/0/0/0 (R2↔R3 upper core) from 1514\nto 1400. R3 stays at default. IS-IS CSNP/PSNP exchange fails for\nlarger LSPs; adjacency stalls in INIT. SPF re-routes through R2's\nalternate core path (R2-R6 to R6-R7 to R7-R4 to R4-R3 — only if such a\npath exists; in this lab R6-R7 + R4-R7 covers it). Mass label-stack\nrecompute on every router.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 upper core) was lowered to 1400 while R3 stays at 1514, creating an asymmetric L3 MTU on the point-to-point link.\nSmall Hello PDUs still fit, but the oversize IS-IS CSNP/PSNP/LSP exchange exceeds R2's reduced MTU and is dropped, so the link-state databases cannot synchronize and the adjacency cannot reach full operation over that link; SPF therefore reroutes traffic between the PEs over the lower-core detour, forcing a mass SR label-stack recompute on every router.\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; small IS-IS\nhello PDUs may still cross the asymmetric MTU and keep the adjacency\nUp, while large LSP/CSNP exchange fails. Diagnostic ground truth\nlives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R2 `show interfaces GigabitEthernet0/0/0/0`: MTU 1400 (baseline: 1514). R3's Gi0/0/0/0: default — asymmetric L3 MTU on a point-to-point link.",
+    "R2 `show running-config interface GigabitEthernet0/0/0/0`: `mtu 1400` present (baseline: line absent).",
+    "Any router `ping <R3-loopback> source Loopback0 size 1500`: fragmentation-needed / drops, while `size 1000` succeeds — asymmetric MTU breaks large-packet traversal.",
+    "R2 `show isis interface GigabitEthernet0/0/0/0`: per-interface state may flag MTU mismatch; full-size LSP exchange from R3 is dropped on R2.",
+    "R0 `show route 192.0.2.3` (R3's Loopback0): if the IS-IS LSP exchange is impaired, the path may shift to a longer detour via R6/R7/R4 — diff `show route` against baseline."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n mtu 1400\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n no mtu\n"
+    }
+  ],
+  "expected_symptoms": []
+}

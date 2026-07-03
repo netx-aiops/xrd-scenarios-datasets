@@ -1,0 +1,41 @@
+{
+  "profile": "isis-ipfrr",
+  "scenario": "r6-segment-routing-mpls-disabled",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R6 removes `segment-routing mpls` from its IS-IS IPv4 address-family.\nR6 stops advertising any SR labels in its LSPs and stops accepting\nremote prefix-SIDs into its MPLS forwarding table. SR-MPLS labels for\nevery prefix through R6 disappear; R6 falls back to plain IP forwarding\nvia IS-IS. Crucially, the backup TI-LFA path R2→R6→R7→R4 was MPLS-\nencapsulated end-to-end — losing SR on R6 breaks the FRR backup.",
+  "target_routers": [
+    "R6"
+  ],
+  "expected_rca": "Root cause: on R6, segment-routing mpls was removed from the IS-IS IPv4 address-family (and R6's Loopback0 prefix-sid removed).\nBecause R6 no longer advertises SR labels in its LSPs and no longer installs remote prefix-SIDs, it falls back to plain IP forwarding; the IS-IS data plane on R6 carries no MPLS labels. Critically, the TI-LFA backup path R2->R6->R7->R4 relied on end-to-end SR-MPLS encapsulation, so with R6's SR capability gone that backup is no longer usable and FRR loses its end-to-end backup for those prefixes.\nFix: restore segment-routing mpls under R6's IS-IS IPv4 AF and re-add the Loopback0 prefix-sid index 6.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; removing\nSR-MPLS from the IS-IS AF is a quiet config event (IS-IS adjacencies\nstay Up). Diagnostic ground truth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R6 `show running-config router isis LAB address-family ipv4 unicast`: no `segment-routing mpls` line (baseline: present). Diff vs every other router — R6 is the only one without it.",
+    "R6 `show running-config router isis LAB interface Loopback0`: no `prefix-sid index 6` line (was removed as a dependency before segment-routing-mpls removal).",
+    "R3 `show isis database verbose` for R6's LSPID: R6's LSP no longer carries SR-Capabilities or Prefix-SID sub-TLVs.",
+    "R2 `show mpls forwarding`: label entries that previously routed via R6 are now unlabeled — plain IP forwarding through R6 only.",
+    "R2 `show isis fast-reroute detail`: backup for primary R2-R3-R4 fails with 'no SR capability on neighbor R6' or similar; the MPLS-encapsulated TI-LFA backup path R2→R6→R7→R4 is no longer usable. `show isis fast-reroute summary` reports reduced backup coverage."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\n interface Loopback0\n  address-family ipv4 unicast\n   no prefix-sid index 6\n"
+    },
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\n address-family ipv4 unicast\n  no segment-routing mpls\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\n address-family ipv4 unicast\n  segment-routing mpls\n"
+    },
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\n interface Loopback0\n  address-family ipv4 unicast\n   prefix-sid index 6\n"
+    }
+  ],
+  "expected_symptoms": []
+}

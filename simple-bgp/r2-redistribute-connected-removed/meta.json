@@ -1,0 +1,33 @@
+{
+  "profile": "simple-bgp",
+  "scenario": "r2-redistribute-connected-removed",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 removes `redistribute connected` from its BGP IPv4 unicast AF. The\niBGP session to R4 stays Up, but R2 no longer injects its directly-\nconnected prefixes (192.0.0.0/30 R2-R0 customer link, 192.0.0.8/30\nR2-R3 core link, 192.0.2.2/32 Loopback0) into BGP. R4's BGP table\nloses these prefixes. Subtle silent failure — no adjacency drop, no\nsyslog; PE-A's customer reachability silently disappears.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, redistribute connected was removed from the BGP IPv4 unicast address-family.\nredistribute connected is what sources R2's directly-connected prefixes into BGP; with it gone, R2 stops injecting those prefixes (192.0.0.0/30, 192.0.0.8/30, Loopback0 192.0.2.2/32) into the IPv4 unicast AF, so the iBGP session to R4 carries no advertisement for them and R4 never learns them, leaving PE-A's customer prefixes unreachable across the core.\nFix: restore redistribute connected under R2's BGP IPv4 unicast AF.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; the iBGP\nsession stays Established and the breakage is \"what's redistributed\".\nDiagnostic ground truth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R2 `show running-config router bgp 100 address-family ipv4 unicast`: no `redistribute connected` line (baseline: present).",
+    "Diff vs R4 `show running-config router bgp 100 address-family ipv4 unicast`: R4 still has `redistribute connected`. R2/R4 configs diverge only on this line.",
+    "R4 `show bgp ipv4 unicast`: prefixes 192.0.0.0/30 (R2-R0 link), 192.0.0.8/30 (R2-R3 link), 192.0.2.2/32 (R2 Loopback0) absent (baseline: present as `B 100 i` from neighbor 192.0.2.2).",
+    "R4 `show route 192.0.0.0/30`: Network not in table (baseline: via 192.0.2.2 BGP).",
+    "R4 `show bgp neighbor 192.0.2.2 | inc Prefix`: prefixes-received counter at 0 (baseline: 3 prefixes received from R2)."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\naddress-family ipv4 unicast\n no redistribute connected\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\naddress-family ipv4 unicast\n redistribute connected\n"
+    }
+  ],
+  "expected_symptoms": []
+}

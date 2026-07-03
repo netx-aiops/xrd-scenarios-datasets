@@ -1,0 +1,32 @@
+{
+  "profile": "srv6-l3vpn",
+  "scenario": "r4-ce-routepolicy-deny-out",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R4 (PE2) replaces its outbound `route-policy PASS out` toward R5 (CE2)\nwith a newly-created `DENY` policy. The eBGP session in VRF CUSTOMER\nstays Established (TCP unaffected), but R4 advertises zero prefixes\nto R5. R5 loses its view of every other customer route (in this case,\n10.10.0.1/32 from CE1). Classic \"PE-facing CE policy fat-finger\" —\nthe operator meant to filter a specific prefix and dropped all.",
+  "target_routers": [
+    "R4"
+  ],
+  "expected_rca": "Root cause: on R4 (PE2), the outbound route-policy PASS out toward R5 (CE2) in VRF CUSTOMER was replaced with a newly-created DENY policy that drops everything.\nThe eBGP session itself is unaffected, but the outbound policy filters every prefix before advertisement, so R4 advertises zero prefixes to R5 and CE2 loses its view of every other customer route (notably 10.10.0.1/32 from CE1) - a fat-finger policy that denied all instead of one prefix.\nFix: restore route-policy PASS out on R4's R5 (10.1.4.1) VRF CUSTOMER neighbor and remove the DENY policy.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; the eBGP\nsession stays Established and the breakage is policy-only.\nDiagnostic ground truth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R4 `show running-config route-policy DENY`: returns `drop`. Bound as outbound policy on the eBGP CE neighbor 10.1.4.1 in VRF CUSTOMER (baseline: `route-policy PASS out`).",
+    "R4 `show bgp vrf CUSTOMER neighbor 10.1.4.1 advertised-routes`: 0 prefixes (baseline: includes R2's customer prefixes such as 10.10.0.1/32 received via VPNv4).",
+    "R5 (CE2) `show route 10.10.0.1/32`: Network not in table — R4 stopped advertising the prefix on the CE-facing eBGP session.",
+    "Reverse direction unaffected: R4 still RECEIVES inbound from R5 (route-policy PASS in untouched). R2's CUSTOMER VRF still has 10.20.0.5/32."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nroute-policy DENY\n  drop\nend-policy\n!\nrouter bgp 100\nvrf CUSTOMER\n neighbor 10.1.4.1\n  address-family ipv4 unicast\n   route-policy DENY out\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nrouter bgp 100\nvrf CUSTOMER\n neighbor 10.1.4.1\n  address-family ipv4 unicast\n   route-policy PASS out\n!\nno route-policy DENY\n"
+    }
+  ],
+  "expected_symptoms": []
+}

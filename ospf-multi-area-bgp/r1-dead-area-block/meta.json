@@ -1,0 +1,32 @@
+{
+  "profile": "ospf-multi-area-bgp",
+  "scenario": "r1-dead-area-block",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R1 grows an orphan `area 2` block with no interface bindings —\nconfiguration parity with several brownfield reference designs that\ncarry dead OSPF lines from copy-paste. The block has no operational\neffect on adjacencies or routing (no interface, no `network`\nstatement), but it shows up in `show running-config router ospf`\noutput and can mislead config-diff tools and human reviewers. Useful\nfor testing the RCA agent's ability to distinguish \"this stanza is\nmeaningless\" from \"this stanza is the bug.\"",
+  "target_routers": [
+    "R1"
+  ],
+  "expected_rca": "No operational root cause: the change is inert.\nOn R1 an empty OSPF `area 2` block was added with no interface and no network binding, so it has zero effect on any adjacency or route - it only appears in the running-config and can mislead config-diff tools.\nThe correct conclusion is that there is no real fault.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R3: neighbor 192.0.2.2.\n- R3: neighbor 192.0.2.6.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R6 (1 instance):\n- R6: Changed state to Not NSR-Ready",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R1",
+      "commands": "configure terminal\nrouter ospf 100\narea 2\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R1",
+      "commands": "configure terminal\nrouter ospf 100\nno area 2\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:40:19.199 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:40:19.198 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:40:23.625 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.6 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:40:23.625 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready"
+  ]
+}

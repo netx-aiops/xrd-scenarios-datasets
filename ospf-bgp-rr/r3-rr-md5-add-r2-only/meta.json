@@ -1,0 +1,37 @@
+{
+  "profile": "ospf-bgp-rr",
+  "scenario": "r3-rr-md5-add-r2-only",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 adds a TCP-MD5 password to its iBGP neighbor toward R2. R2 has no\npassword configured. The TCP layer drops R2's segments (MD5 option\nrequired by R3); the BGP session never completes a 3-way handshake.\nR2's session to R7 (secondary RR) is unaffected, so the prefix flow\npartially survives. Subtle RR-A vs RR-B asymmetry — the session to one\nRR is dead but the other works.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3, a TCP-MD5 password was added to the iBGP neighbor toward R2 while R2 has no password.\nBecause only one end authenticates the TCP segments with MD5, the two ends disagree on the TCP-MD5 option, so the underlying TCP connection cannot be established and the R3<->R2 BGP session never completes its handshake; R2's session to R7 (secondary RR) is unaffected, so prefix flow partially survives - an RR-A-dead / RR-B-alive asymmetry.\nFix: remove the password from R3's R2 neighbor.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R3: neighbor 192.0.2.2 → a.\n- R3: neighbor 192.0.2.4 → a.\n\n%IP-TCP-3-NOAUTH reported by R2 (3 instances):\n- R2: Authentication info not programmed for the packet received from 192.0.2.3:60077 to 192.0.2.2:179\n- R2: Authentication info not programmed for the packet received from 192.0.2.3:60077 to 192.0.2.2:179\n- R2: Authentication info not programmed for the packet received from 192.0.2.3:60077 to 192.0.2.2:179\n\n%IP-TCP-3-BADAUTH reported by R3 (3 instances):\n- R3: Invalid MD5 digest from 192.0.2.2:179 to 192.0.2.3:60077 for vrf:default (0x60000000)\n- R3: Invalid MD5 digest from 192.0.2.2:179 to 192.0.2.3:60077 for vrf:default (0x60000000)\n- R3: Invalid MD5 digest from 192.0.2.2:179 to 192.0.2.3:60077 for vrf:default (0x60000000)",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.2\n password clear secret\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.2\n no password\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:29:05.997 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Down - Peer closing down the session (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:29:05.995 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Down - Neighbor moved to a new cluster (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:29:05.995 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Down - Neighbor moved to a new cluster (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:29:10.745 UTC: tcp[193]: %IP-TCP-3-NOAUTH : Authentication info not programmed for the packet received from 192.0.2.3:60077 to 192.0.2.2:179",
+    "RP/0/RP0/CPU0:May 17 13:29:22.745 UTC: tcp[193]: %IP-TCP-3-NOAUTH : Authentication info not programmed for the packet received from 192.0.2.3:60077 to 192.0.2.2:179",
+    "RP/0/RP0/CPU0:May 17 13:29:38.747 UTC: tcp[193]: %IP-TCP-3-NOAUTH : Authentication info not programmed for the packet received from 192.0.2.3:60077 to 192.0.2.2:179",
+    "RP/0/RP0/CPU0:May 17 13:29:34.601 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.2:179 to 192.0.2.3:60077 for vrf:default (0x60000000)",
+    "RP/0/RP0/CPU0:May 17 13:29:48.600 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.2:179 to 192.0.2.3:60077 for vrf:default (0x60000000)",
+    "RP/0/RP0/CPU0:May 17 13:30:04.600 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.2:179 to 192.0.2.3:60077 for vrf:default (0x60000000)"
+  ]
+}

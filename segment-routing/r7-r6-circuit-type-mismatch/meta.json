@@ -1,0 +1,33 @@
+{
+  "profile": "segment-routing",
+  "scenario": "r7-r6-circuit-type-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R7 changes the IS-IS circuit-type on GigabitEthernet0/0/0/0 (R7↔R6) to\n`level-1`. R6 stays at L2 (inherited from `is-type level-2-only`). The\ntwo ends speak different IIH levels; no adjacency forms. The lower-\ncore path R2-R6-R7-R4 is partitioned; traffic from R6 to R7 must\ndetour through R2-R3-R4-R7.",
+  "target_routers": [
+    "R7"
+  ],
+  "expected_rca": "Root cause: on R7, the IS-IS circuit-type on GigabitEthernet0/0/0/0 (the R7<->R6 link) was set to level-1 while R6 operates as level-2-only (inherited from is-type).\nThe two ends exchange IIH hellos at different levels, so they never agree on a common level and the IS-IS adjacency cannot form on that link. The lower-core path R2-R6-R7-R4 is partitioned and R6<->R7 traffic must detour via R2-R3-R4-R7.\nFix: remove the circuit-type override on R7's GigabitEthernet0/0/0/0 (return it to level-2).",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario. The circuit-\ntype mismatch silently prevents the adjacency from re-forming on\nthe next hello cycle; no ADJCHANGE Down log is emitted because the\nadjacency had not yet fully established (or the previous-state log\nscrolls off before scenario-verify post-snapshot). Diagnostic ground\ntruth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R7 `show running-config router isis LAB interface GigabitEthernet0/0/0/0`: `circuit-type level-1` line present (baseline: absent — interface inherits global L2-only).",
+    "R7 `show isis interface GigabitEthernet0/0/0/0 | inc Level|Circuit`: Circuit Type = Level-1 (other interfaces on R7 still report Level-2).",
+    "R7 `show isis adjacency`: R6 no longer listed under Gi0/0/0/0 (baseline: R6 was a Level-2 adjacency on this link).",
+    "R6 `show isis adjacency`: R7 missing on the corresponding Gi interface — mismatched IIH levels prevent the adjacency from forming.",
+    "R7 `show route 192.0.2.6`: path detours via R4 → R3 → R2 → R6 instead of direct R7-R6 (longer label stack visible in `show mpls forwarding`)."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R7",
+      "commands": "configure terminal\nrouter isis LAB\ninterface GigabitEthernet0/0/0/0\n circuit-type level-1\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R7",
+      "commands": "configure terminal\nrouter isis LAB\ninterface GigabitEthernet0/0/0/0\n no circuit-type\n"
+    }
+  ],
+  "expected_symptoms": []
+}

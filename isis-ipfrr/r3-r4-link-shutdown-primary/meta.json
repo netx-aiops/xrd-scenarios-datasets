@@ -1,0 +1,29 @@
+{
+  "profile": "isis-ipfrr",
+  "scenario": "r3-r4-link-shutdown-primary",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 shuts down GigabitEthernet0/0/0/1 (the R3↔R4 link, primary-path\nmetric 10). The IS-IS adjacency R3↔R4 drops; SPF recomputes with the\nprimary path removed. TI-LFA, which was pre-programmed on R2's\nGigabitEthernet0/0/0/0 to use the backup R2→R6→R7→R4 path, activates\nfor sub-50ms convergence — but afterwards the global SPF reconvergence\npromotes the backup as the new primary (total metric 60 via R6+R7+R4).\nIdeal test of TI-LFA end-to-end: detect the link drop, confirm FRR\npre-programmed backup activated, then verify post-SPF state.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3, GigabitEthernet0/0/0/1 (the R3<->R4 primary link, metric 10) was administratively shut down.\nShutting the interface tears down the R3<->R4 IS-IS adjacency, so that link can no longer carry the primary path; the pre-programmed TI-LFA backup on R2's Gi0/0/0/0 activates for sub-50ms protection, then SPF reconverges to promote the backup R2->R6->R7->R4 path (total metric 60) as the new primary. Reachability to R4 is preserved via the longer path.\nFix: no shutdown on R3's GigabitEthernet0/0/0/1.",
+  "expected_symptoms_summary": "Interface state change (%PKT_INFRA-LINK-5-CHANGED):\n- R3: GigabitEthernet0/0/0/1 → Administratively Down.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n shutdown\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n no shutdown\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:16:57.203 UTC: ifmgr[333]: %PKT_INFRA-LINK-5-CHANGED : Interface GigabitEthernet0/0/0/1, changed state to Administratively Down"
+  ]
+}

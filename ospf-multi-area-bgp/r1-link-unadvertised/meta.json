@@ -1,0 +1,30 @@
+{
+  "profile": "ospf-multi-area-bgp",
+  "scenario": "r1-link-unadvertised",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R1 removes GigabitEthernet0/0/0/1 (the R1↔R2 link, 192.0.0.4/30) from\nits OSPF Area 1. R2 still expects an adjacency on the link, so the\nneighbor never comes up on R2's side. eBGP between R1 (AS 65001) and\nR2 (AS 65000) keeps working — it uses directly-connected next-hops,\nnot OSPF — but loopback-based reachability into 192.0.2.1 from beyond\nR2 is lost. R2 emits OSPF retry / neighbor-init noise on the link.",
+  "target_routers": [
+    "R1"
+  ],
+  "expected_rca": "Root cause: on R1, GigabitEthernet0/0/0/1 (the R1<->R2 link) was removed from OSPF area 1.\nWith one end no longer running OSPF on that interface while R2 still does, the two ends cannot exchange OSPF hellos on the link, so the R1<->R2 adjacency cannot form and the link's prefixes are not exchanged via OSPF. eBGP R1<->R2 keeps working because it uses directly-connected next-hops, but R1's loopback 192.0.2.1 is no longer advertised into OSPF, so its reachability is lost beyond R2.\nFix: re-add GigabitEthernet0/0/0/1 to OSPF area 1 on R1.",
+  "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R1: neighbor 192.0.2.2 on GigabitEthernet0/0/0/1 (area 1) FULL → DOWN reason \"interface down or detached\".\n- R2: neighbor 192.0.2.1 on GigabitEthernet0/0/0/2 (area 1) FULL → DOWN reason \"dead timer expired\".\n- Bilateral: both ends (R1, R2) report the transition.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R1",
+      "commands": "configure terminal\nrouter ospf 100\narea 1\nno interface GigabitEthernet0/0/0/1\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R1",
+      "commands": "configure terminal\nrouter ospf 100\narea 1\ninterface GigabitEthernet0/0/0/1\n message-digest-key 1 md5 cisco123\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:41:16.772 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.2 on GigabitEthernet0/0/0/1 in area 1 from FULL to DOWN, Neighbor Down: interface down or detached, vrf default vrfid 0x60000000",
+    "RP/0/RP0/CPU0:May 17 13:41:47.924 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.1 on GigabitEthernet0/0/0/2 in area 1 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000"
+  ]
+}

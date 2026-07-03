@@ -1,0 +1,31 @@
+{
+  "profile": "segment-routing",
+  "scenario": "r6-prefix-sid-conflict-r4",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R6 changes its Loopback0 prefix-SID from `index 6` to `index 4` — the\nsame SID already used by R4. SR control-plane prefers the LSP with the\nlower system-id (or earliest install) and rejects the conflicting\nprefix-SID. One router (likely R6) loses its SID-based reachability;\nthe other (R4) keeps it. Traffic engineering paths anchored on the\nloser's loopback break.",
+  "target_routers": [
+    "R6"
+  ],
+  "expected_rca": "Root cause: on R6, the Loopback0 prefix-SID was changed from index 6 to index 4, colliding with R4's existing index 4; both indices resolve to the same MPLS label (16004), so two distinct loopback prefixes (192.0.2.4/32 and 192.0.2.6/32) claim one global SID.\nA prefix-SID label must map to exactly one prefix, so IS-IS SR cannot install both and rejects the loser's prefix-SID (likely R6's); that loopback loses its SID-based label binding and TE paths anchored on it cannot be programmed.\nFix: restore R6's Loopback0 prefix-SID to index 6.",
+  "expected_symptoms_summary": "%ROUTING-ISIS-6-PREFIX_SID_INFO reported by R0, R1, R2 (3 instances):\n- R0: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'\n- R1: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'\n- R2: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\ninterface Loopback0\n address-family ipv4 unicast\n  prefix-sid index 4\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\ninterface Loopback0\n address-family ipv4 unicast\n  prefix-sid index 6\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 14:00:09.130 UTC: isis[1003]: %ROUTING-ISIS-6-PREFIX_SID_INFO : ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'",
+    "RP/0/RP0/CPU0:May 17 14:00:09.129 UTC: isis[1003]: %ROUTING-ISIS-6-PREFIX_SID_INFO : ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'",
+    "RP/0/RP0/CPU0:May 17 14:00:09.128 UTC: isis[1003]: %ROUTING-ISIS-6-PREFIX_SID_INFO : ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'"
+  ]
+}

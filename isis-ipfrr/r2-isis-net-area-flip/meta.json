@@ -1,0 +1,32 @@
+{
+  "profile": "isis-ipfrr",
+  "scenario": "r2-isis-net-area-flip",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 is reconfigured with NET 49.0099.0000.0000.0002.00, intending to\nmove R2 from area 49.0001 into 49.0099 while R3, R4, R6, R7 stay in\n49.0001. In practice the move does NOT take effect: IOS-XR permits\nmultiple NETs per IS-IS instance for area migration, so this ADDS\n49.0099 alongside the original 49.0001 NET rather than replacing it.\nCombined with `is-type level-2-only` (L2 adjacencies span areas), no\nadjacency drops, no ADJCHANGE fires, and there is no data-plane\nimpact - the only artifact is a stray second NET in the running-config.\nNegative/no-op test: the agent should detect the config oddity without\nconfabulating an outage.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Effectively no operational root cause; the change is inert. On R2 the IS-IS NET was set to 49.0099.0000.0000.0002.00 intending to move R2 into area 49.0099, but IOS-XR permits multiple NETs per IS-IS instance for area migration and ADDED 49.0099 alongside the original 49.0001.0000.0000.0002.00 instead of replacing it.\nBecause this profile runs is-type level-2-only, L2 adjacencies span area boundaries, so the extra area address does not change adjacency formation and there is no data-plane impact; the only artifact is a stray second NET in the running-config that can mislead config-diff tools.\nFix: remove the added 49.0099 NET so R2 is left with its single NET 49.0001.0000.0000.0002.00.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario. IOS-XR\npermits multiple NET addresses per IS-IS instance for area-migration\nuse cases, so this apply ADDS a second NET rather than replacing\nthe first; L2 adjacencies (level-2-only spans areas) are unaffected\nand no ADJCHANGE fires. Diagnostic ground truth lives in\nexpected_state_diffs.",
+  "expected_state_diffs": [
+    "R2 `show running-config router isis LAB | include net`: TWO net lines — `49.0001.0000.0000.0002.00` (baseline) AND `49.0099.0000.0000.0002.00` (added by apply).",
+    "Every other router `show running-config router isis LAB | include net`: exactly one net line in area 49.0001.",
+    "R3 `show isis database` for R2's LSPID: R2 advertises area-id 49.0099 in addition to 49.0001 in its Area Addresses TLV.",
+    "Note: revert in this manifest re-adds the original NET but does NOT explicitly `no net 49.0099...`; full baseline restoration is an explicit `no net` step the operator must do separately."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter isis LAB\n net 49.0099.0000.0000.0002.00\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter isis LAB\n net 49.0001.0000.0000.0002.00\n"
+    }
+  ],
+  "expected_symptoms": []
+}

@@ -1,0 +1,31 @@
+{
+  "profile": "ospf-bgp-rr",
+  "scenario": "r3-rr-cluster-id-changed",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 changes `bgp cluster-id 1` to `bgp cluster-id 7`. R7 keeps cluster-id\n1. The two RRs now have *different* cluster-IDs, breaking the shared-\ncluster loop-prevention pattern: routes reflected by R7 are no longer\nrecognized by R3 as already-reflected, so R3 re-reflects them, and vice\nversa. Each iBGP-learned prefix is now received twice by PE clients\nwith different cluster-list contents → unnecessary path churn, possible\nbest-path oscillation, and double the BGP table size.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3, bgp cluster-id was changed from 1 to 7 while R7 (the other RR) keeps cluster-id 1.\nWith mismatched cluster-IDs the shared-cluster loop prevention breaks: each RR no longer recognizes the other's reflected routes as already-reflected, so they re-reflect each other's routes. PE clients receive each iBGP prefix twice with differing cluster-lists, causing path churn, possible best-path oscillation, and a doubled BGP table.\nFix: set R3's bgp cluster-id back to 1.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R2: neighbor 192.0.2.3.\n- R2: neighbor 192.0.2.3.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nbgp cluster-id 7\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nbgp cluster-id 1\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:28:01.053 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:28:02.675 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Down - Peer closing down the session (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:28:07.658 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Up (VRF: default) (AS: 65000)"
+  ]
+}

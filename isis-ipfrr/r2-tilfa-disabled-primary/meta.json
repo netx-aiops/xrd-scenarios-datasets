@@ -1,0 +1,33 @@
+{
+  "profile": "isis-ipfrr",
+  "scenario": "r2-tilfa-disabled-primary",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 removes `fast-reroute per-prefix ti-lfa` from GigabitEthernet0/0/0/0\n(the primary path to R3). TI-LFA backup for the primary interface is\nno longer pre-programmed. Steady-state traffic still uses the primary\nunchanged, but when the primary fails, sub-50ms protection is lost —\ntraffic blackholes until full IS-IS reconvergence (seconds). Negative-\nish case: no syslog, no adjacency drop, no route change until something\n*else* fails. Pure protection-state misconfig.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, fast-reroute per-prefix ti-lfa (and per-prefix FRR) was removed from GigabitEthernet0/0/0/0, the primary path to R3.\nWithout per-prefix TI-LFA, IS-IS no longer pre-computes and pre-installs a loop-free backup path for the primary interface, so the change is operationally inert while the primary stays in service - steady-state forwarding still follows the primary unchanged. The consequence is latent: if the primary later fails, there is no pre-programmed backup to switch to, so traffic blackholes until full IS-IS reconvergence (seconds) instead of getting sub-50ms protection. Pure protection-state misconfig with no active fault.\nFix: re-enable fast-reroute per-prefix and fast-reroute per-prefix ti-lfa on R2's GigabitEthernet0/0/0/0.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario by design.\nPure protection-state misconfig: adjacency stays Up, route table\nunchanged, no event fires. Diagnostic ground truth lives in\nexpected_state_diffs (pre-failure protection check).",
+  "expected_state_diffs": [
+    "R2 `show running-config router isis LAB interface GigabitEthernet0/0/0/0`: no `fast-reroute per-prefix` and no `fast-reroute per-prefix ti-lfa` lines (baseline: both present).",
+    "Diff vs any other router's primary interface (e.g. R3 `show running-config router isis LAB interface GigabitEthernet0/0/0/0`): the other end keeps both lines.",
+    "R2 `show isis fast-reroute detail` for 192.0.2.4/32: backup column reports `No backup` (baseline: backup via R6 with a labelled path).",
+    "R2 `show isis fast-reroute summary`: backup coverage % drops vs baseline. Operationally this is the signal a TI-LFA dashboard would surface.",
+    "Steady-state forwarding unchanged: `show route 192.0.2.4` still resolves via the primary; the gap only matters when the primary fails."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter isis LAB\ninterface GigabitEthernet0/0/0/0\n address-family ipv4 unicast\n  no fast-reroute per-prefix ti-lfa\n  no fast-reroute per-prefix\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter isis LAB\ninterface GigabitEthernet0/0/0/0\n address-family ipv4 unicast\n  fast-reroute per-prefix\n  fast-reroute per-prefix ti-lfa\n"
+    }
+  ],
+  "expected_symptoms": []
+}

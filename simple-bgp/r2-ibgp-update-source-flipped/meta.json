@@ -1,0 +1,32 @@
+{
+  "profile": "simple-bgp",
+  "scenario": "r2-ibgp-update-source-flipped",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 removes `update-source Loopback0` from its iBGP neighbor toward R4\n(192.0.2.4). R2 now sources BGP OPEN from the physical interface IP\n(192.0.0.9, the R2-R3 link). R4 receives OPEN from an IP that doesn't\nmatch its configured neighbor (R4 has `neighbor 192.0.2.2`). R4 silently\nrejects the connection; the session never reaches Established. PE-A\n(R2) and PE-B (R4) stop exchanging iBGP prefixes.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, update-source Loopback0 was removed from the iBGP neighbor toward R4 (192.0.2.4), so R2 sources its BGP OPEN from the physical interface IP 192.0.0.9 instead of its Loopback0.\nR4 is configured for neighbor 192.0.2.2 and rejects the connection arriving from an unexpected source address, so the iBGP session cannot be established and PE-A (R2) and PE-B (R4) stop exchanging prefixes.\nFix: restore update-source Loopback0 on R2's R4 neighbor.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.2.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R2, R4 (2 instances):\n- R2: Changed state to NSR-Ready\n- R4: Changed state to NSR-Ready",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\nneighbor 192.0.2.4\n no update-source\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\nneighbor 192.0.2.4\n update-source Loopback0\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 22:12:39.367 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Down - Neighbor local address configuration changed (VRF: default) (AS: 100)",
+    "RP/0/RP0/CPU0:May 17 22:12:39.376 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Down - Peer closing down the session (VRF: default) (AS: 100)",
+    "RP/0/RP0/CPU0:May 17 22:12:39.370 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to NSR-Ready",
+    "RP/0/RP0/CPU0:May 17 22:12:39.378 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to NSR-Ready"
+  ]
+}

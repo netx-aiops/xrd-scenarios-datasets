@@ -1,0 +1,29 @@
+{
+  "profile": "segment-routing",
+  "scenario": "r6-r7-link-shutdown",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R6 shuts down GigabitEthernet0/0/0/1 (the R6↔R7 link). The lower-core\npath R2-R6-R7-R4 breaks. The upper-core path R2-R3-R4 absorbs all\ntraffic between PE-A and PE-B. Loss of path redundancy — if upper-core\nfails next, no alternate route. ECMP between upper and lower core\ncollapses to single-path on every router. Excellent test of the\nagent's ability to detect topology/redundancy degradation.",
+  "target_routers": [
+    "R6"
+  ],
+  "expected_rca": "Root cause: on R6, GigabitEthernet0/0/0/1 (the R6<->R7 link) was administratively shut down.\nDisabling the interface tears down the lower-core path R2-R6-R7-R4, so all PE-A<->PE-B traffic collapses onto the single remaining upper-core path R2-R3-R4 and ECMP across the two cores is lost. Reachability is preserved, but path redundancy is degraded - a second upper-core failure would isolate the PEs.\nFix: no shutdown on R6's GigabitEthernet0/0/0/1.",
+  "expected_symptoms_summary": "Interface state change (%PKT_INFRA-LINK-5-CHANGED):\n- R6: GigabitEthernet0/0/0/1 → Administratively Down.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n shutdown\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n no shutdown\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 14:01:14.032 UTC: ifmgr[333]: %PKT_INFRA-LINK-5-CHANGED : Interface GigabitEthernet0/0/0/1, changed state to Administratively Down"
+  ]
+}

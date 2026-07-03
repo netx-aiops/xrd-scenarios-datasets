@@ -1,0 +1,41 @@
+{
+  "profile": "segment-routing",
+  "scenario": "r3-no-segment-routing-mpls",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 removes `segment-routing mpls` from its IS-IS IPv4 address-family.\nR3 stops emitting SR sub-TLVs in its LSPs and stops processing remote\nprefix-SIDs into its MPLS forwarding table. R3 is the BGP vRR for\nservice signaling and a core P-router — losing SR on R3 kills any\nSR-TE policy whose transit traverses R3, even though plain IS-IS\nforwarding and BGP still work.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3, segment-routing mpls was removed from the IS-IS IPv4 address-family (and R3's Loopback0 prefix-sid removed).\nWithout segment-routing mpls under the IPv4 AF, R3 no longer advertises SR-Capabilities or Prefix-SID sub-TLVs in its LSPs and no longer installs remote prefix-SIDs into its MPLS forwarding table, so it falls back to plain IP forwarding; the IS-IS topology and adjacencies are unaffected. Since R3 is a core P-router (and BGP vRR), any SR-TE policy whose transit traverses R3 can no longer build its label stack and breaks, even though plain IS-IS forwarding and BGP still work.\nFix: restore segment-routing mpls under R3's IS-IS IPv4 AF and re-add the Loopback0 prefix-sid index 3.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; removing\nSR-MPLS from the IS-IS AF is a quiet config event (IS-IS adjacencies\nstay Up). Diagnostic ground truth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R3 `show running-config router isis LAB address-family ipv4 unicast`: no `segment-routing mpls` line (baseline: present). Diff vs R4 / any peer — R3 is the only one missing it.",
+    "R3 `show running-config router isis LAB interface Loopback0`: no `prefix-sid index 3` line (was removed as a dependency before the segment-routing-mpls removal).",
+    "R3 `show segment-routing mpls connected-prefix-sid-map ipv4`: empty (baseline: R3's own 192.0.2.3/32 mapped to index 3; remote prefix-SIDs present).",
+    "Any router `show isis database verbose <R3-LSPID>`: R3's LSP no longer carries SR-Capabilities or Prefix-SID sub-TLVs.",
+    "R2 `show mpls forwarding`: label entries for prefixes whose IGP path traverses R3 disappear — plain IP forwarding remains, but SR label stacks collapse."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter isis LAB\n interface Loopback0\n  address-family ipv4 unicast\n   no prefix-sid index 3\n"
+    },
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter isis LAB\n address-family ipv4 unicast\n  no segment-routing mpls\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter isis LAB\n address-family ipv4 unicast\n  segment-routing mpls\n"
+    },
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter isis LAB\n interface Loopback0\n  address-family ipv4 unicast\n   prefix-sid index 3\n"
+    }
+  ],
+  "expected_symptoms": []
+}

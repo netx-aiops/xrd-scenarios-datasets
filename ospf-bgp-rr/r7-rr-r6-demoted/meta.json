@@ -1,0 +1,32 @@
+{
+  "profile": "ospf-bgp-rr",
+  "scenario": "r7-rr-r6-demoted",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R7 (the secondary RR) re-points R6's neighbor from the RR-CLIENT\nneighbor-group to the RR-PEER neighbor-group. R7 now treats R6 as a\nregular iBGP peer (no `route-reflector-client`). R6-originated prefixes\nstill get reflected by R3 (the primary RR) — so initially nothing\nbreaks visibly. But if R3 is restarted or its session to R6 is\ndisrupted, only R7's reflection path exists, and that path no longer\nreflects to other clients. Redundancy is silently halved.",
+  "target_routers": [
+    "R7"
+  ],
+  "expected_rca": "Root cause: on R7 (secondary RR), the R6 neighbor was moved from the RR-CLIENT neighbor-group to RR-PEER, so R7 no longer reflects R6-originated prefixes to other clients.\nR3 (primary RR) still reflects R6's routes, so nothing breaks visibly, but redundancy is silently halved - if R3 or its R6 session is disrupted, R7's surviving path no longer reflects R6's prefixes to the rest of the AS.\nFix: move R6 back to the RR-CLIENT neighbor-group on R7.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R3: neighbor 192.0.2.6.\n- R4: neighbor 192.0.2.7.\n- R6: neighbor 192.0.2.3.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R6 (1 instance):\n- R6: Changed state to Not NSR-Ready",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R7",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.6\n no use neighbor-group RR-CLIENT\n use neighbor-group RR-PEER\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R7",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.6\n no use neighbor-group RR-PEER\n use neighbor-group RR-CLIENT\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:35:00.326 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.6 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:35:09.747 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.7 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:35:00.325 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:35:00.325 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready"
+  ]
+}

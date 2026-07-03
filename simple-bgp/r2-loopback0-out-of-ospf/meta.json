@@ -1,0 +1,32 @@
+{
+  "profile": "simple-bgp",
+  "scenario": "r2-loopback0-out-of-ospf",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 removes its Loopback0 (192.0.2.2/32) from OSPF Area 0. R3 and R4\nno longer learn an OSPF route to 192.0.2.2. R4's iBGP session to R2\nis loopback-peered; with the route gone, R4 cannot reach 192.0.2.2 →\nthe TCP session for iBGP drops. PE-A and PE-B stop exchanging routes\neven though the data-plane link R2-R3-R4 still works for transit\nbetween non-loopback IPs.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, Loopback0 (192.0.2.2/32) was removed from OSPF area 0, so R3 and R4 no longer learn an OSPF route to 192.0.2.2.\nR4's iBGP session to R2 is loopback-peered, so once the route to 192.0.2.2 disappears the TCP session can no longer be reached and the iBGP session cannot stay established; PE-A and PE-B stop exchanging routes even though transit between non-loopback IPs still works.\nFix: re-advertise R2's Loopback0 into OSPF area 0.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.2.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R2, R4 (2 instances):\n- R2: Changed state to Not NSR-Ready\n- R4: Changed state to Not NSR-Ready",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter ospf 100\narea 0\nno interface Loopback0\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter ospf 100\narea 0\ninterface Loopback0\n passive enable\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 14:07:36.022 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Up (VRF: default) (AS: 100)",
+    "RP/0/RP0/CPU0:May 17 14:07:36.021 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Up (VRF: default) (AS: 100)",
+    "RP/0/RP0/CPU0:May 17 14:07:36.023 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready",
+    "RP/0/RP0/CPU0:May 17 14:07:36.021 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready"
+  ]
+}

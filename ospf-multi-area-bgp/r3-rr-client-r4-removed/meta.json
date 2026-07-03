@@ -1,0 +1,31 @@
+{
+  "profile": "ospf-multi-area-bgp",
+  "scenario": "r3-rr-client-r4-removed",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 (the AS 65000 Route Reflector) removes the `route-reflector-client`\nflag from its R4 neighbor's address-family. The iBGP TCP session stays\nUp, but R3 now treats R4 as a normal iBGP peer — R3 only re-advertises\nR4-originated routes to its eBGP peers (none in this lab) and other\nnon-client iBGP peers (none), and crucially **does not** reflect them\nto its other RR-clients (R2, R6, R7). Result: R2, R6, R7 stop seeing\nR4's eBGP-learned prefixes (192.88.99.11..20) and any redistributed-\nconnected /30s from R4. Subtle fault — no syslog, only data-plane.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3 (the AS 65000 route reflector), the `route-reflector-client` flag was removed from the R4 iBGP neighbor.\nMechanism: a route reflector only reflects routes learned from a client to its other clients; with R4 no longer marked as a client, R3 treats R4 as a plain iBGP peer and the no-readvertisement-to-iBGP-peers rule applies, so R4-originated routes are not reflected to R3's remaining clients (R2, R6, R7). The iBGP TCP session itself is unaffected, so the failure is purely in the control-plane route distribution: R2, R6, R7 never receive R4's eBGP-learned prefixes (192.88.99.11-20) and redistributed connecteds, leaving those destinations unreachable from them.\nFix: re-add `route-reflector-client` to R3's R4 neighbor address-family.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R3: neighbor 192.0.2.4.\n- R3: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.3.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.4\n address-family ipv4 unicast\n  no route-reflector-client\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.4\n address-family ipv4 unicast\n  route-reflector-client\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:44:39.965 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Down - RR client configuration changed (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:44:44.984 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:44:39.970 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Down - Peer closing down the session (VRF: default) (AS: 65000)"
+  ]
+}

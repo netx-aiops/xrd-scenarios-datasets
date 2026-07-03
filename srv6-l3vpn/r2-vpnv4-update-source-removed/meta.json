@@ -1,0 +1,31 @@
+{
+  "profile": "srv6-l3vpn",
+  "scenario": "r2-vpnv4-update-source-removed",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 (PE1) removes `update-source Loopback0` from its VPNv4 iBGP neighbor\ntoward R4 (PE2, peering address fc00::4). R2 now sources the IPv6 BGP\nsession from a link-local or physical interface IPv6 address (not\nfc00::2). R4 expects `neighbor fc00::2` and rejects the connection.\nVPNv4 session never Established → no VPNv4 routes exchanged → customer\nprefix 10.20.0.5/32 (from CE2) doesn't reach VRF CUSTOMER on PE1, and\n10.10.0.1/32 (from CE1) doesn't reach PE2. End-to-end VPN dark.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2 (PE1), update-source Loopback0 was removed from the VPNv4 iBGP neighbor toward R4 (fc00::4), so R2 sources the IPv6 session from a non-Loopback address instead of fc00::2.\nR4 expects neighbor fc00::2 and rejects the connection, so the VPNv4 session never establishes and no VPNv4 routes are exchanged - 10.20.0.5/32 (from CE2) never reaches PE1's VRF CUSTOMER and 10.10.0.1/32 (from CE1) never reaches PE2, leaving the end-to-end VPN dark.\nFix: restore update-source Loopback0 on R2's fc00::4 neighbor.",
+  "expected_symptoms_summary": "%SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL reported by R2 (1 instance):\n- R2: sshd[5836]: Connection closed by 100.64.0.2 port 60338\n\nBGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor fc00::4.\n- R4: neighbor fc00::2.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\nneighbor fc00::4\n no update-source\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter bgp 100\nneighbor fc00::4\n update-source Loopback0\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 17:03:29.281 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[5836]: Connection closed by 100.64.0.2 port 60338",
+    "RP/0/RP0/CPU0:May 17 17:03:31.143 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor fc00::4 Down - Neighbor local address configuration changed (VRF: default) (AS: 100)",
+    "RP/0/RP0/CPU0:May 17 17:03:31.146 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor fc00::2 Down - Peer closing down the session (VRF: default) (AS: 100)"
+  ]
+}

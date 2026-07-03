@@ -1,0 +1,32 @@
+{
+  "profile": "isis-ipfrr",
+  "scenario": "r6-loopback-prefix-sid-removed",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R6 removes the `prefix-sid index 6` from its Loopback0 IS-IS\nconfiguration. R6's loopback is still advertised as a plain IS-IS\nprefix (reachable via IP) but no SR label is associated with it.\nOther routers can no longer push an SR label stack to reach R6 — only\nplain IP forwarding works. SR-TE policies whose path goes through R6\nbreak. iBGP-LU/BGP-LU paths that anchor on R6's loopback SID are\nunresolved.",
+  "target_routers": [
+    "R6"
+  ],
+  "expected_rca": "Root cause: on R6, the prefix-sid was removed from its Loopback0 IS-IS configuration.\nR6's loopback (192.0.2.6) is still advertised as a plain IS-IS prefix and reachable by IP, but its IS-IS LSP no longer carries a Prefix-SID sub-TLV, so no router can associate an SR label with R6's loopback or build an SR label stack to reach it. Consequently SR-TE policies and BGP-LU paths that anchor on R6's loopback SID cannot resolve and break, while plain IP forwarding to R6 still works.\nFix: re-add prefix-sid index 6 to R6's Loopback0.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; removing\nprefix-sid on Loopback0 is a quiet IS-IS LSP attribute change.\nDiagnostic ground truth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R6 `show running-config router isis LAB interface Loopback0`: no `prefix-sid` line (baseline: `prefix-sid index 6`). Diff vs R7's Loopback0 — R7 still has `prefix-sid index 7`.",
+    "Any router `show segment-routing mpls connected-prefix-sid-map ipv4`: R6's 192.0.2.6/32 row missing (baseline reservation: R2:2, R3:3, R4:4, R6:6, R7:7 — only R6 absent).",
+    "R3 `show isis database verbose` for R6's LSPID: R6's Loopback0 prefix carries no Prefix-SID sub-TLV (baseline: index 6).",
+    "R2 `show mpls forwarding`: no label entry for 16006 (default SRGB 16000 + index 6) — only plain IP path to R6 remains; SR label stacks anchored on R6's loopback are unresolved."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\ninterface Loopback0\n address-family ipv4 unicast\n  no prefix-sid\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\nrouter isis LAB\ninterface Loopback0\n address-family ipv4 unicast\n  prefix-sid index 6\n"
+    }
+  ],
+  "expected_symptoms": []
+}

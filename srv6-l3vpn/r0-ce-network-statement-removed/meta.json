@@ -1,0 +1,31 @@
+{
+  "profile": "srv6-l3vpn",
+  "scenario": "r0-ce-network-statement-removed",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R0 (CE1) removes `network 10.10.0.1/32` from its BGP IPv4 AF. CE1\nstops originating the customer prefix toward PE1. PE1's VRF CUSTOMER\nBGP table loses 10.10.0.1/32. No VPNv4 advertisement to PE2. R5 (CE2)\nstops seeing CE1's network. The eBGP session stays Established; no\nsyslog event — it's a pure data-plane / prefix-origination failure.\nClassic \"operator removed a network statement\" customer outage.",
+  "target_routers": [
+    "R0"
+  ],
+  "expected_rca": "Root cause: on R0 (CE1), network 10.10.0.1/32 was removed from the BGP IPv4 address-family, so CE1 no longer originates its customer prefix toward PE1.\nBecause the prefix is never injected into BGP, the eBGP session continues to operate normally yet carries nothing for this route: 10.10.0.1/32 is absent from PE1's VRF CUSTOMER table, is never redistributed as a VPNv4 route to PE2, and therefore cannot reach R5 (CE2) - a pure prefix-origination outage with no session-level breakage.\nFix: re-add network 10.10.0.1/32 under R0's BGP IPv4 unicast AF.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R0: neighbor 10.1.1.0.\n- R2: neighbor 10.1.1.1.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R0 (1 instance):\n- R0: Changed state to Not NSR-Ready",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R0",
+      "commands": "configure terminal\nrouter bgp 65001\naddress-family ipv4 unicast\n no network 10.10.0.1/32\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R0",
+      "commands": "configure terminal\nrouter bgp 65001\naddress-family ipv4 unicast\n network 10.10.0.1/32\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 14:21:47.847 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 10.1.1.0 Up (VRF: default) (AS: 100)",
+    "RP/0/RP0/CPU0:May 17 14:21:47.848 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 10.1.1.1 Up (VRF: CUSTOMER) (AS: 65001)",
+    "RP/0/RP0/CPU0:May 17 14:21:47.848 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready"
+  ]
+}

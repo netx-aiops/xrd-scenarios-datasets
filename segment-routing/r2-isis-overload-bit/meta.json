@@ -1,0 +1,33 @@
+{
+  "profile": "segment-routing",
+  "scenario": "r2-isis-overload-bit",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 sets the IS-IS overload bit (`set-overload-bit on-startup 300`,\nbut applied without the on-startup qualifier for live effect). Every\nother router sees R2's LSP with the OL bit set and treats R2 as\nnon-transit — they will *not* compute paths *through* R2 to reach any\nother node. R0 is only connected to R2 → R0 becomes isolated from\nR3/R4/R5/R6/R7. Heavy data-plane impact.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on R2, the IS-IS overload bit was set (set-overload-bit).\nR2 advertises its LSP with the OL bit, which by IS-IS SPF rules signals every other router to exclude R2 as a transit node, so no node computes a path through R2. R0 is single-homed to R2, so R0 cannot reach R3/R4/R5/R6/R7 and is isolated from the rest of the topology.\nFix: clear the overload bit (no set-overload-bit) on R2.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; IS-IS\noverload-bit propagation is a quiet LSP attribute change.\nDiagnostic ground truth lives in expected_state_diffs.",
+  "expected_state_diffs": [
+    "R2 `show isis database verbose | inc Overload`: OL=1 (baseline: OL=0). On every other router, `show isis database R2` shows the same OL bit set in R2's LSP.",
+    "R2 `show running-config router isis LAB`: `set-overload-bit` line present (baseline: absent).",
+    "Any router `show isis topology`: paths through R2 omitted — R2 is no longer a transit node.",
+    "R0 `show route 192.0.2.6` (or any non-R2 loopback): Network not in table — R0 is the only router solely connected to R2 and is now isolated.",
+    "R5 `show route 192.0.2.10` (R0's loopback): Network not in table — R5 can't reach R0 because the only path traverses R2 which is non-transit."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter isis LAB\n set-overload-bit\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter isis LAB\n no set-overload-bit\n"
+    }
+  ],
+  "expected_symptoms": []
+}

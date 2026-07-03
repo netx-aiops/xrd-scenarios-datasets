@@ -1,0 +1,33 @@
+{
+  "profile": "simple-bgp",
+  "scenario": "r4-ospf-area-flip",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R4's R3-facing GigabitEthernet0/0/0/0 is moved from OSPF area 0 to\narea 1 while R3 stays in area 0. The OSPF adjacency stalls in\nEXSTART and the LSDB diverges. Because BGP next-hop reachability for\nthe iBGP session R4↔R2 depends on Loopback0 reachability through the\nOSPF area 0 backbone, redistributed prefixes from R4 stop propagating\nto R2 once the OSPF adjacency falls.",
+  "target_routers": [
+    "R4"
+  ],
+  "expected_rca": "Root cause: on R4, GigabitEthernet0/0/0/0 (the R4<->R3 link) was moved from OSPF area 0 to area 1 while R3 keeps it in area 0.\nThe two ends disagree on the area ID, so OSPF cannot form an adjacency on that link and no routes are exchanged across it. Because R4's iBGP next-hop reachability depends on Loopback0 reachability through the area-0 backbone, R4's redistributed prefixes stop propagating to R2.\nFix: return R4's GigabitEthernet0/0/0/0 to OSPF area 0.",
+  "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R3: neighbor 192.0.2.4 on GigabitEthernet0/0/0/1 (area 0) FULL → DOWN reason \"dead timer expired\".\n- R4: neighbor 192.0.2.3 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"interface down or detached\".\n- Bilateral: both ends (R3, R4) report the transition.\n\nOSPF packet receive error (%ROUTING-OSPF-4-ERRRCV):\n- R4: mismatch area ID from peer 192.0.0.17 on GigabitEthernet0/0/0/0.\n- R4: mismatch area ID from peer 192.0.0.17 on GigabitEthernet0/0/0/0.\n- R4: mismatch area ID from peer 192.0.0.17 on GigabitEthernet0/0/0/0.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nrouter ospf 100\narea 0\nno interface GigabitEthernet0/0/0/0\narea 1\ninterface GigabitEthernet0/0/0/0\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nrouter ospf 100\narea 1\nno interface GigabitEthernet0/0/0/0\narea 0\ninterface GigabitEthernet0/0/0/0\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 14:15:58.498 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.4 on GigabitEthernet0/0/0/1 in area 0 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000",
+    "RP/0/RP0/CPU0:May 17 14:15:27.023 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.3 on GigabitEthernet0/0/0/0 in area 0 from FULL to DOWN, Neighbor Down: interface down or detached, vrf default vrfid 0x60000000",
+    "RP/0/RP0/CPU0:May 17 14:15:31.951 UTC: ospf[1035]: %ROUTING-OSPF-4-ERRRCV : Received invalid packet: mismatch area ID, from backbone area must be virtual-link but not found from 192.0.0.17, GigabitEthernet0/0/0/0",
+    "RP/0/RP0/CPU0:May 17 14:15:50.946 UTC: ospf[1035]: %ROUTING-OSPF-4-ERRRCV : Received invalid packet: mismatch area ID, from backbone area must be virtual-link but not found from 192.0.0.17, GigabitEthernet0/0/0/0",
+    "RP/0/RP0/CPU0:May 17 14:16:09.245 UTC: ospf[1035]: %ROUTING-OSPF-4-ERRRCV : Received invalid packet: mismatch area ID, from backbone area must be virtual-link but not found from 192.0.0.17, GigabitEthernet0/0/0/0"
+  ]
+}

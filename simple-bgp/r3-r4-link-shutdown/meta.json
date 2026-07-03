@@ -1,0 +1,29 @@
+{
+  "profile": "simple-bgp",
+  "scenario": "r3-r4-link-shutdown",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 administratively shuts down GigabitEthernet0/0/0/1 (the R3↔R4 link,\n192.0.0.16/30). The OSPF Area 0 adjacency between R3 and R4 drops. R4's\nLoopback0 (192.0.2.4) becomes unreachable from R2 via R3. R4 is now\nisolated from the OSPF underlay — its iBGP session to R2 fails because\nR2 can't route to 192.0.2.4. Data plane between PE-A and PE-B is\nblack-holed.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on R3, GigabitEthernet0/0/0/1 (the R3<->R4 link, 192.0.0.16/30) was administratively shut down.\nWith that link down, the OSPF area-0 adjacency between R3 and R4 can no longer form, so R4's Loopback0 (192.0.2.4) is no longer advertised into the underlay and becomes unreachable through R3; since R3 is the only OSPF transit between R2 and R4, R2 cannot route to 192.0.2.4, the loopback-sourced iBGP session to R4 cannot establish, and PE-A<->PE-B traffic is black-holed.\nFix: no shutdown on R3's GigabitEthernet0/0/0/1.",
+  "expected_symptoms_summary": "Interface state change (%PKT_INFRA-LINK-5-CHANGED):\n- R3: GigabitEthernet0/0/0/1 → Administratively Down.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n shutdown\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n no shutdown\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 14:12:05.025 UTC: ifmgr[333]: %PKT_INFRA-LINK-5-CHANGED : Interface GigabitEthernet0/0/0/1, changed state to Administratively Down"
+  ]
+}

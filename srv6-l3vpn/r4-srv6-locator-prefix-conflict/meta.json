@@ -1,0 +1,32 @@
+{
+  "profile": "srv6-l3vpn",
+  "scenario": "r4-srv6-locator-prefix-conflict",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R4 (PE2) changes its SRv6 locator PE2 prefix from `fcbb:bb00:4::/48` to\n`fcbb:bb00:2::/48` — the same prefix already used by R2's PE1 locator.\nTwo SRv6 locators advertise overlapping /48 prefixes. IS-IS LSDB sees\nthe same prefix from two sources → routes alternate or one wins via\ntiebreak. SRv6 End/End.X SIDs encoded in fcbb:bb00:2::xxxx now have\nambiguous resolution — packets destined to PE2's SRv6 functions may\nbe forwarded to PE1's locator.",
+  "target_routers": [
+    "R4"
+  ],
+  "expected_rca": "Root cause: on R4 (PE2), the SRv6 locator PE2 prefix was changed from fcbb:bb00:4::/48 to fcbb:bb00:2::/48 - the same prefix already used by R2's PE1 locator.\nTwo locators now advertise the overlapping /48, which violates locator-prefix uniqueness across PEs, so IS-IS cannot unambiguously bind the prefix to a single owner and the SRv6 End/End.X SIDs encoded under fcbb:bb00:2:: are no longer resolvable to PE2 alone; packets for PE2's SRv6 functions may be forwarded to PE1 instead.\nFix: restore R4's PE2 locator prefix to fcbb:bb00:4::/48.",
+  "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; SRv6\nlocator prefix changes are quiet config events. The duplicate-prefix\nconflict is visible via CLI probe. Diagnostic ground truth lives in\nexpected_state_diffs.",
+  "expected_state_diffs": [
+    "R4 `show segment-routing srv6 locator`: PE2 advertises prefix fcbb:bb00:2::/48 (baseline: fcbb:bb00:4::/48). The per-PE assignment PE1=::2, TRANSIT=::3, PE2=::4 is violated.",
+    "Any router `show segment-routing srv6 locator`: TWO locators advertise fcbb:bb00:2::/48 — R2's PE1 (Owner=local for R2) and R4's PE2 (Owner=local for R4).",
+    "R3 `show route ipv6 fcbb:bb00:2::/48`: two IS-IS sources (R2 and R4); best-path tiebreak picks one and End/End.X SIDs encoded under fcbb:bb00:2:: may forward to the wrong PE.",
+    "R4 `show running-config segment-routing srv6 locators | section PE2`: prefix line shows fcbb:bb00:2::/48 — diff vs R4's baseline (fcbb:bb00:4::/48)."
+  ],
+  "is_silent": true,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nsegment-routing\n srv6\n  locators\n   locator PE2\n    prefix fcbb:bb00:2::/48\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nsegment-routing\n srv6\n  locators\n   locator PE2\n    prefix fcbb:bb00:4::/48\n"
+    }
+  ],
+  "expected_symptoms": []
+}
