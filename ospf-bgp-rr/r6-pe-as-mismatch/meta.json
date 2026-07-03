@@ -6,7 +6,7 @@
   "target_routers": [
     "R6"
   ],
-  "expected_rca": "Root cause: on R6, the BGP process was moved from AS 65000 to AS 65001 (router bgp 65001) while the RRs (R3, R7) still treat R6 as iBGP in AS 65000.\nR6 now advertises itself as AS 65001, but BGP requires the AS number a peer advertises to match the remote-as the other end expects; R3 and R7 expect 65000, so the negotiation is rejected as an AS mismatch and neither the R6<->R3 nor the R6<->R7 session can establish, leaving R6 partitioned from the iBGP mesh and no routes exchanged with it.\nFix: restore R6's BGP process under AS 65000 (with its original router-id, redistribute connected, and the R3/R7 neighbors).",
+  "expected_rca": "Root cause: on 100.64.0.106 (R6), the BGP process was moved from AS 65000 to AS 65001 (router bgp 65001) while the RRs (R3, R7) still treat R6 as iBGP in AS 65000.\nR6 now advertises itself as AS 65001, but BGP requires the AS number a peer advertises to match the remote-as the other end expects; R3 and R7 expect 65000, so the negotiation is rejected as an AS mismatch and neither the R6<->R3 nor the R6<->R7 session can establish, leaving R6 partitioned from the iBGP mesh and no routes exchanged with it.\nFix: restore R6's BGP process under AS 65000 (with its original router-id, redistribute connected, and the R3/R7 neighbors).",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R3: neighbor 192.0.2.6.\n- R7: neighbor 192.0.2.6.\n\n%ROUTING-BGP-5-ASYNC_IPC_STATUS reported by R6 (3 instances):\n- R6: bpm-default:(A)inst-id 0, Connection Closed (Unconfig)\n- R6: bpm-default:(A)inst-id 0, Connection Open\n- R6: default, process instance 1:(A)inst-id 0, Connection Established",
   "expected_state_diffs": [],
   "is_silent": false,

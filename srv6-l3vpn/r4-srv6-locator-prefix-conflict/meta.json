@@ -6,7 +6,7 @@
   "target_routers": [
     "R4"
   ],
-  "expected_rca": "Root cause: on R4 (PE2), the SRv6 locator PE2 prefix was changed from fcbb:bb00:4::/48 to fcbb:bb00:2::/48 - the same prefix already used by R2's PE1 locator.\nTwo locators now advertise the overlapping /48, which violates locator-prefix uniqueness across PEs, so IS-IS cannot unambiguously bind the prefix to a single owner and the SRv6 End/End.X SIDs encoded under fcbb:bb00:2:: are no longer resolvable to PE2 alone; packets for PE2's SRv6 functions may be forwarded to PE1 instead.\nFix: restore R4's PE2 locator prefix to fcbb:bb00:4::/48.",
+  "expected_rca": "Root cause: on 100.64.0.104 (R4, PE2), the SRv6 locator PE2 prefix was changed from fcbb:bb00:4::/48 to fcbb:bb00:2::/48 - the same prefix already used by R2's PE1 locator.\nTwo locators now advertise the overlapping /48, which violates locator-prefix uniqueness across PEs, so IS-IS cannot unambiguously bind the prefix to a single owner and the SRv6 End/End.X SIDs encoded under fcbb:bb00:2:: are no longer resolvable to PE2 alone; packets for PE2's SRv6 functions may be forwarded to PE1 instead.\nFix: restore R4's PE2 locator prefix to fcbb:bb00:4::/48.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; SRv6\nlocator prefix changes are quiet config events. The duplicate-prefix\nconflict is visible via CLI probe. Diagnostic ground truth lives in\nexpected_state_diffs.",
   "expected_state_diffs": [
     "R4 `show segment-routing srv6 locator`: PE2 advertises prefix fcbb:bb00:2::/48 (baseline: fcbb:bb00:4::/48). The per-PE assignment PE1=::2, TRANSIT=::3, PE2=::4 is violated.",

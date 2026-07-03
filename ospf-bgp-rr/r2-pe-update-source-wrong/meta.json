@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2 (PE1), update-source Loopback0 was removed from the iBGP neighbor toward R3 (primary RR), so R2 sources its OPEN from the R2-R3 interface IP 192.0.0.9 instead of Loopback0 192.0.2.2.\nR3 expects 192.0.2.2 and silently rejects the connection, so the R2<->R3 iBGP session cannot establish; R2's correctly-configured session to R7 (secondary RR) still carries prefixes, but R3 receives no R2-originated paths and any R3-only client loses reachability to R2's prefixes.\nFix: restore update-source Loopback0 on R2's R3 neighbor.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2, PE1), update-source Loopback0 was removed from the iBGP neighbor toward R3 (primary RR), so R2 sources its OPEN from the R2-R3 interface IP 192.0.0.9 instead of Loopback0 192.0.2.2.\nR3 expects 192.0.2.2 and silently rejects the connection, so the R2<->R3 iBGP session cannot establish; R2's correctly-configured session to R7 (secondary RR) still carries prefixes, but R3 receives no R2-originated paths and any R3-only client loses reachability to R2's prefixes.\nFix: restore update-source Loopback0 on R2's R3 neighbor.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R2: neighbor 192.0.2.7.\n- R3: neighbor 192.0.2.2.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R2 (2 instances):\n- R2: Changed state to NSR-Ready\n- R2: Changed state to Not NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

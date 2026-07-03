@@ -6,7 +6,7 @@
   "target_routers": [
     "R3"
   ],
-  "expected_rca": "Root cause: on R3, GigabitEthernet0/0/0/1 (the R3<->R4 link, 192.0.0.16/30) was administratively shut down.\nWith that link down, the OSPF area-0 adjacency between R3 and R4 can no longer form, so R4's Loopback0 (192.0.2.4) is no longer advertised into the underlay and becomes unreachable through R3; since R3 is the only OSPF transit between R2 and R4, R2 cannot route to 192.0.2.4, the loopback-sourced iBGP session to R4 cannot establish, and PE-A<->PE-B traffic is black-holed.\nFix: no shutdown on R3's GigabitEthernet0/0/0/1.",
+  "expected_rca": "Root cause: on 100.64.0.103 (R3), GigabitEthernet0/0/0/1 (the R3<->R4 link, 192.0.0.16/30) was administratively shut down.\nWith that link down, the OSPF area-0 adjacency between R3 and R4 can no longer form, so R4's Loopback0 (192.0.2.4) is no longer advertised into the underlay and becomes unreachable through R3; since R3 is the only OSPF transit between R2 and R4, R2 cannot route to 192.0.2.4, the loopback-sourced iBGP session to R4 cannot establish, and PE-A<->PE-B traffic is black-holed.\nFix: no shutdown on R3's GigabitEthernet0/0/0/1.",
   "expected_symptoms_summary": "Interface state change (%PKT_INFRA-LINK-5-CHANGED):\n- R3: GigabitEthernet0/0/0/1 → Administratively Down.",
   "expected_state_diffs": [],
   "is_silent": false,

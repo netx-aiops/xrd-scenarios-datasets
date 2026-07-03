@@ -6,7 +6,7 @@
   "target_routers": [
     "R0"
   ],
-  "expected_rca": "Root cause: on R0 (CE1), network 10.10.0.1/32 was removed from the BGP IPv4 address-family, so CE1 no longer originates its customer prefix toward PE1.\nBecause the prefix is never injected into BGP, the eBGP session continues to operate normally yet carries nothing for this route: 10.10.0.1/32 is absent from PE1's VRF CUSTOMER table, is never redistributed as a VPNv4 route to PE2, and therefore cannot reach R5 (CE2) - a pure prefix-origination outage with no session-level breakage.\nFix: re-add network 10.10.0.1/32 under R0's BGP IPv4 unicast AF.",
+  "expected_rca": "Root cause: on 100.64.0.100 (R0, CE1), network 10.10.0.1/32 was removed from the BGP IPv4 address-family, so CE1 no longer originates its customer prefix toward PE1.\nBecause the prefix is never injected into BGP, the eBGP session continues to operate normally yet carries nothing for this route: 10.10.0.1/32 is absent from PE1's VRF CUSTOMER table, is never redistributed as a VPNv4 route to PE2, and therefore cannot reach R5 (CE2) - a pure prefix-origination outage with no session-level breakage.\nFix: re-add network 10.10.0.1/32 under R0's BGP IPv4 unicast AF.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R0: neighbor 10.1.1.0.\n- R2: neighbor 10.1.1.1.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R0 (1 instance):\n- R0: Changed state to Not NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

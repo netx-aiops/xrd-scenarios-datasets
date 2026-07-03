@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, an IS-IS HMAC-MD5 hello-password (secret123) was added to GigabitEthernet0/0/0/0 (the R2<->R3 primary link) while R3 has none.\nThe two ends disagree on Hello authentication: R2 expects an authenticated Hello with a valid auth TLV while R3 sends none, and R3 expects an unauthenticated Hello while R2 sends an authenticated one, so each end rejects the other's IIHs and the Level-2 adjacency on the primary path cannot stay up. IS-IS therefore reconverges onto the backup R2->R6->R7->R4 path, and TI-LFA protection on Gi0/0/0/0 is lost because there is no adjacency left to back up.\nFix: remove the hello-password from R2's GigabitEthernet0/0/0/0.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), an IS-IS HMAC-MD5 hello-password (secret123) was added to GigabitEthernet0/0/0/0 (the R2<->R3 primary link) while R3 has none.\nThe two ends disagree on Hello authentication: R2 expects an authenticated Hello with a valid auth TLV while R3 sends none, and R3 expects an unauthenticated Hello while R2 sends an authenticated one, so each end rejects the other's IIHs and the Level-2 adjacency on the primary path cannot stay up. IS-IS therefore reconverges onto the backup R2->R6->R7->R4 path, and TI-LFA protection on Gi0/0/0/0 is lost because there is no adjacency left to back up.\nFix: remove the hello-password from R2's GigabitEthernet0/0/0/0.",
   "expected_symptoms_summary": "%ROUTING-ISIS-5-AUTH_FAILURE_DROP reported by R2 (1 instance):\n- R2: ISIS (LAB): Dropped P2P IIH from Gi0/0/0/0, R3 (0000.0000.0003), SNPA aac1.abd6.aaa1 due to authentication TLV not found",
   "expected_state_diffs": [],
   "is_silent": false,

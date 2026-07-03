@@ -6,7 +6,7 @@
   "target_routers": [
     "R6"
   ],
-  "expected_rca": "Root cause: on R6, the Loopback0 prefix-SID was changed from index 6 to index 4, colliding with R4's existing index 4; both indices resolve to the same MPLS label (16004), so two distinct loopback prefixes (192.0.2.4/32 and 192.0.2.6/32) claim one global SID.\nA prefix-SID label must map to exactly one prefix, so IS-IS SR cannot install both and rejects the loser's prefix-SID (likely R6's); that loopback loses its SID-based label binding and TE paths anchored on it cannot be programmed.\nFix: restore R6's Loopback0 prefix-SID to index 6.",
+  "expected_rca": "Root cause: on 100.64.0.106 (R6), the Loopback0 prefix-SID was changed from index 6 to index 4, colliding with R4's existing index 4; both indices resolve to the same MPLS label (16004), so two distinct loopback prefixes (192.0.2.4/32 and 192.0.2.6/32) claim one global SID.\nA prefix-SID label must map to exactly one prefix, so IS-IS SR cannot install both and rejects the loser's prefix-SID (likely R6's); that loopback loses its SID-based label binding and TE paths anchored on it cannot be programmed.\nFix: restore R6's Loopback0 prefix-SID to index 6.",
   "expected_symptoms_summary": "%ROUTING-ISIS-6-PREFIX_SID_INFO reported by R0, R1, R2 (3 instances):\n- R0: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'\n- R1: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'\n- R2: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16004 for algo SPF is used by 192.0.2.4/32 and 192.0.2.6/32'",
   "expected_state_diffs": [],
   "is_silent": false,

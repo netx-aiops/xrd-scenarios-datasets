@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, redistribute connected was removed from the BGP IPv4 unicast address-family.\nredistribute connected is what sources R2's directly-connected prefixes into BGP; with it gone, R2 stops injecting those prefixes (192.0.0.0/30, 192.0.0.8/30, Loopback0 192.0.2.2/32) into the IPv4 unicast AF, so the iBGP session to R4 carries no advertisement for them and R4 never learns them, leaving PE-A's customer prefixes unreachable across the core.\nFix: restore redistribute connected under R2's BGP IPv4 unicast AF.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), redistribute connected was removed from the BGP IPv4 unicast address-family.\nredistribute connected is what sources R2's directly-connected prefixes into BGP; with it gone, R2 stops injecting those prefixes (192.0.0.0/30, 192.0.0.8/30, Loopback0 192.0.2.2/32) into the IPv4 unicast AF, so the iBGP session to R4 carries no advertisement for them and R4 never learns them, leaving PE-A's customer prefixes unreachable across the core.\nFix: restore redistribute connected under R2's BGP IPv4 unicast AF.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; the iBGP\nsession stays Established and the breakage is \"what's redistributed\".\nDiagnostic ground truth lives in expected_state_diffs.",
   "expected_state_diffs": [
     "R2 `show running-config router bgp 100 address-family ipv4 unicast`: no `redistribute connected` line (baseline: present).",

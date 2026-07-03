@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, the SR Global Block was changed from the default 16000-23999 to 100000-107999.\nR2 now allocates and expects SID labels from 100000, but every other router still pushes labels computed from the default SRGB when forwarding toward R2, so the two SRGBs no longer agree on the label-to-SID mapping and R2's SR LFIB cannot resolve incoming transit labels - those packets get punted or dropped.\nFix: remove the custom global-block on R2 (restore the default 16000-23999).",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), the SR Global Block was changed from the default 16000-23999 to 100000-107999.\nR2 now allocates and expects SID labels from 100000, but every other router still pushes labels computed from the default SRGB when forwarding toward R2, so the two SRGBs no longer agree on the label-to-SID mapping and R2's SR LFIB cannot resolve incoming transit labels - those packets get punted or dropped.\nFix: remove the custom global-block on R2 (restore the default 16000-23999).",
   "expected_symptoms_summary": "%ROUTING-ISIS-6-SRGB_INFO reported by R2 (2 instances):\n- R2: ISIS (LAB): SRGB (index 0, 16000 23999, SRGB_ALLOCATED, 0x1) modified to (100000 107999), global cfg change, disabling SR\n- R2: ISIS (LAB): SRGB (index 0, 100000 107999, SRGB_ALLOCATED, 0x0) allocation complete, enabling SR",
   "expected_state_diffs": [],
   "is_silent": false,

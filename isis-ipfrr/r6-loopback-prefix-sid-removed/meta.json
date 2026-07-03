@@ -6,7 +6,7 @@
   "target_routers": [
     "R6"
   ],
-  "expected_rca": "Root cause: on R6, the prefix-sid was removed from its Loopback0 IS-IS configuration.\nR6's loopback (192.0.2.6) is still advertised as a plain IS-IS prefix and reachable by IP, but its IS-IS LSP no longer carries a Prefix-SID sub-TLV, so no router can associate an SR label with R6's loopback or build an SR label stack to reach it. Consequently SR-TE policies and BGP-LU paths that anchor on R6's loopback SID cannot resolve and break, while plain IP forwarding to R6 still works.\nFix: re-add prefix-sid index 6 to R6's Loopback0.",
+  "expected_rca": "Root cause: on 100.64.0.106 (R6), the prefix-sid was removed from its Loopback0 IS-IS configuration.\nR6's loopback (192.0.2.6) is still advertised as a plain IS-IS prefix and reachable by IP, but its IS-IS LSP no longer carries a Prefix-SID sub-TLV, so no router can associate an SR label with R6's loopback or build an SR label stack to reach it. Consequently SR-TE policies and BGP-LU paths that anchor on R6's loopback SID cannot resolve and break, while plain IP forwarding to R6 still works.\nFix: re-add prefix-sid index 6 to R6's Loopback0.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; removing\nprefix-sid on Loopback0 is a quiet IS-IS LSP attribute change.\nDiagnostic ground truth lives in expected_state_diffs.",
   "expected_state_diffs": [
     "R6 `show running-config router isis LAB interface Loopback0`: no `prefix-sid` line (baseline: `prefix-sid index 6`). Diff vs R7's Loopback0 — R7 still has `prefix-sid index 7`.",

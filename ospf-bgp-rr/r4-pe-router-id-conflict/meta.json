@@ -6,7 +6,7 @@
   "target_routers": [
     "R4"
   ],
-  "expected_rca": "Root cause: on R4 (PE2), bgp router-id was changed to 192.0.2.3 - the same router-id already used by R3 (primary RR).\nBGP requires each peer's identifier to be unique; R4's BGP OPEN now advertises 192.0.2.3, which collides with R3's own identifier on the R4-R3 session and with the 192.0.2.3 R7 already associates with R3 on the R4-R7 session. The duplicate-identifier invariant is violated on both sessions, so neither iBGP session can be established and no routes are exchanged across them, partitioning R4 from both route reflectors.\nFix: set R4's bgp router-id back to 192.0.2.4 so its identifier is unique again.",
+  "expected_rca": "Root cause: on 100.64.0.104 (R4, PE2), bgp router-id was changed to 192.0.2.3 - the same router-id already used by R3 (primary RR).\nBGP requires each peer's identifier to be unique; R4's BGP OPEN now advertises 192.0.2.3, which collides with R3's own identifier on the R4-R3 session and with the 192.0.2.3 R7 already associates with R3 on the R4-R7 session. The duplicate-identifier invariant is violated on both sessions, so neither iBGP session can be established and no routes are exchanged across them, partitioning R4 from both route reflectors.\nFix: set R4's bgp router-id back to 192.0.2.4 so its identifier is unique again.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R3: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.3.\n- R4: neighbor 192.0.2.7.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R4 (2 instances):\n- R4: Changed state to NSR-Ready\n- R4: Changed state to Not NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

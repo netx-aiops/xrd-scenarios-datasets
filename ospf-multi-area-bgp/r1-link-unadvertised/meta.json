@@ -6,7 +6,7 @@
   "target_routers": [
     "R1"
   ],
-  "expected_rca": "Root cause: on R1, GigabitEthernet0/0/0/1 (the R1<->R2 link) was removed from OSPF area 1.\nWith one end no longer running OSPF on that interface while R2 still does, the two ends cannot exchange OSPF hellos on the link, so the R1<->R2 adjacency cannot form and the link's prefixes are not exchanged via OSPF. eBGP R1<->R2 keeps working because it uses directly-connected next-hops, but R1's loopback 192.0.2.1 is no longer advertised into OSPF, so its reachability is lost beyond R2.\nFix: re-add GigabitEthernet0/0/0/1 to OSPF area 1 on R1.",
+  "expected_rca": "Root cause: on 100.64.0.101 (R1), GigabitEthernet0/0/0/1 (the R1<->R2 link) was removed from OSPF area 1.\nWith one end no longer running OSPF on that interface while R2 still does, the two ends cannot exchange OSPF hellos on the link, so the R1<->R2 adjacency cannot form and the link's prefixes are not exchanged via OSPF. eBGP R1<->R2 keeps working because it uses directly-connected next-hops, but R1's loopback 192.0.2.1 is no longer advertised into OSPF, so its reachability is lost beyond R2.\nFix: re-add GigabitEthernet0/0/0/1 to OSPF area 1 on R1.",
   "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R1: neighbor 192.0.2.2 on GigabitEthernet0/0/0/1 (area 1) FULL → DOWN reason \"interface down or detached\".\n- R2: neighbor 192.0.2.1 on GigabitEthernet0/0/0/2 (area 1) FULL → DOWN reason \"dead timer expired\".\n- Bilateral: both ends (R1, R2) report the transition.",
   "expected_state_diffs": [],
   "is_silent": false,

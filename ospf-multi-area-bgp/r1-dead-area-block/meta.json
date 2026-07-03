@@ -6,7 +6,7 @@
   "target_routers": [
     "R1"
   ],
-  "expected_rca": "No operational root cause: the change is inert.\nOn R1 an empty OSPF `area 2` block was added with no interface and no network binding, so it has zero effect on any adjacency or route - it only appears in the running-config and can mislead config-diff tools.\nThe correct conclusion is that there is no real fault.",
+  "expected_rca": "No operational root cause: the change is inert.\nOn 100.64.0.101 (R1) an empty OSPF `area 2` block was added with no interface and no network binding, so it has zero effect on any adjacency or route - it only appears in the running-config and can mislead config-diff tools.\nThe correct conclusion is that there is no real fault.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R3: neighbor 192.0.2.2.\n- R3: neighbor 192.0.2.6.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R6 (1 instance):\n- R6: Changed state to Not NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

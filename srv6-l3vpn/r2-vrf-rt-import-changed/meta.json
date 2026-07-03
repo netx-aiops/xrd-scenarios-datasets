@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2 (PE1), the VRF CUSTOMER import route-target was changed from 100:1 to 100:2 while R4 (PE2) still exports and imports 100:1.\nPE2's VPNv4 advertisements (RT 100:1) no longer match PE1's import filter and are silently dropped, so 10.20.0.5/32 (from CE2) is not imported into PE1's VRF CUSTOMER and CE1 cannot reach CE2; the reverse direction still works because PE1 still exports 100:1.\nFix: restore the import route-target to 100:1 on R2's VRF CUSTOMER.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2, PE1), the VRF CUSTOMER import route-target was changed from 100:1 to 100:2 while R4 (PE2) still exports and imports 100:1.\nPE2's VPNv4 advertisements (RT 100:1) no longer match PE1's import filter and are silently dropped, so 10.20.0.5/32 (from CE2) is not imported into PE1's VRF CUSTOMER and CE1 cannot reach CE2; the reverse direction still works because PE1 still exports 100:1.\nFix: restore the import route-target to 100:1 on R2's VRF CUSTOMER.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; the VPNv4\nBGP session stays Established and the breakage is filter-only.\nDiagnostic ground truth lives in expected_state_diffs.",
   "expected_state_diffs": [
     "R2 `show running-config vrf CUSTOMER | section import`: import route-target 100:2 (baseline: 100:1).",

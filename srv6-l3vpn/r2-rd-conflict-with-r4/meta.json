@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2 (PE1), a second VRF CUSTOMER_DUP was created with route-distinguisher 100:2 - the same RD already used by R4 (PE2) for its CUSTOMER VRF - and route-target 100:1, which matches the baseline CUSTOMER RT.\nTwo PEs now originate VPNv4 routes under rd 100:2 (R2 advertising 10.99.0.0/24, R4 its customer prefixes) and both import into every CUSTOMER VRF, so receivers see two PE sources for rd 100:2 and best-path selection becomes ambiguous. This is a silent static misconfig with no control-plane event.\nFix: remove the CUSTOMER_DUP VRF and its BGP / static configuration on R2.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2, PE1), a second VRF CUSTOMER_DUP was created with route-distinguisher 100:2 - the same RD already used by R4 (PE2) for its CUSTOMER VRF - and route-target 100:1, which matches the baseline CUSTOMER RT.\nTwo PEs now originate VPNv4 routes under rd 100:2 (R2 advertising 10.99.0.0/24, R4 its customer prefixes) and both import into every CUSTOMER VRF, so receivers see two PE sources for rd 100:2 and best-path selection becomes ambiguous. This is a silent static misconfig with no control-plane event.\nFix: remove the CUSTOMER_DUP VRF and its BGP / static configuration on R2.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario. The\nfault is a static RD-conflict misconfiguration with no\ncontrol-plane event; ground truth lives in expected_state_diffs.",
   "expected_state_diffs": [
     "R2 `show running-config router bgp 100 | section vrf`: TWO vrf blocks — CUSTOMER (rd 100:1, baseline) and CUSTOMER_DUP (rd 100:2 — duplicates R4's RD).",

@@ -6,7 +6,7 @@
   "target_routers": [
     "R3"
   ],
-  "expected_rca": "Root cause: on R3, bgp cluster-id was changed from 1 to 7 while R7 (the other RR) keeps cluster-id 1.\nWith mismatched cluster-IDs the shared-cluster loop prevention breaks: each RR no longer recognizes the other's reflected routes as already-reflected, so they re-reflect each other's routes. PE clients receive each iBGP prefix twice with differing cluster-lists, causing path churn, possible best-path oscillation, and a doubled BGP table.\nFix: set R3's bgp cluster-id back to 1.",
+  "expected_rca": "Root cause: on 100.64.0.103 (R3), bgp cluster-id was changed from 1 to 7 while R7 (the other RR) keeps cluster-id 1.\nWith mismatched cluster-IDs the shared-cluster loop prevention breaks: each RR no longer recognizes the other's reflected routes as already-reflected, so they re-reflect each other's routes. PE clients receive each iBGP prefix twice with differing cluster-lists, causing path churn, possible best-path oscillation, and a doubled BGP table.\nFix: set R3's bgp cluster-id back to 1.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R2: neighbor 192.0.2.3.\n- R2: neighbor 192.0.2.3.",
   "expected_state_diffs": [],
   "is_silent": false,

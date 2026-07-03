@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 primary path) was lowered to 1400 while R3 stays at 1514.\nThe asymmetric MTU means the oversize LSP/CSNP exchange cannot complete across the link, so the IS-IS link-state databases cannot synchronize and the adjacency cannot reach full operation. As a result the primary path is unusable for IS-IS and traffic to R4 routes over the backup R2->R6->R7->R4 path (metric 60).\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 primary path) was lowered to 1400 while R3 stays at 1514.\nThe asymmetric MTU means the oversize LSP/CSNP exchange cannot complete across the link, so the IS-IS link-state databases cannot synchronize and the adjacency cannot reach full operation. As a result the primary path is unusable for IS-IS and traffic to R4 routes over the backup R2->R6->R7->R4 path (metric 60).\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; small IS-IS\nhello PDUs may still cross the asymmetric MTU and keep the adjacency\nUp, while large LSP/CSNP exchange fails. Diagnostic ground truth\nlives in expected_state_diffs.",
   "expected_state_diffs": [
     "R2 `show interfaces GigabitEthernet0/0/0/0`: MTU 1400 (baseline: 1514). R3's Gi0/0/0/0: still default — asymmetric L3 MTU on the R2-R3 primary.",

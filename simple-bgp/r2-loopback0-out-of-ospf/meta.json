@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, Loopback0 (192.0.2.2/32) was removed from OSPF area 0, so R3 and R4 no longer learn an OSPF route to 192.0.2.2.\nR4's iBGP session to R2 is loopback-peered, so once the route to 192.0.2.2 disappears the TCP session can no longer be reached and the iBGP session cannot stay established; PE-A and PE-B stop exchanging routes even though transit between non-loopback IPs still works.\nFix: re-advertise R2's Loopback0 into OSPF area 0.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), Loopback0 (192.0.2.2/32) was removed from OSPF area 0, so R3 and R4 no longer learn an OSPF route to 192.0.2.2.\nR4's iBGP session to R2 is loopback-peered, so once the route to 192.0.2.2 disappears the TCP session can no longer be reached and the iBGP session cannot stay established; PE-A and PE-B stop exchanging routes even though transit between non-loopback IPs still works.\nFix: re-advertise R2's Loopback0 into OSPF area 0.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.2.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R2, R4 (2 instances):\n- R2: Changed state to Not NSR-Ready\n- R4: Changed state to Not NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

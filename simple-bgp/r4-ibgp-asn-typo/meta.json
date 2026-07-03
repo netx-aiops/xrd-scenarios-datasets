@@ -6,7 +6,7 @@
   "target_routers": [
     "R4"
   ],
-  "expected_rca": "Root cause: on R4, the iBGP neighbor toward R2 was reconfigured with remote-as 200 while R2 is router bgp 100.\nR4's BGP OPEN now advertises AS 200, but R2 expects the locally configured peer AS to match its own AS 100 for an iBGP session; because the advertised and expected AS disagree, the BGP session cannot be brought up and PE-A and PE-B stop exchanging prefixes.\nFix: set the R2 neighbor's remote-as back to 100 on R4.",
+  "expected_rca": "Root cause: on 100.64.0.104 (R4), the iBGP neighbor toward R2 was reconfigured with remote-as 200 while R2 is router bgp 100.\nR4's BGP OPEN now advertises AS 200, but R2 expects the locally configured peer AS to match its own AS 100 for an iBGP session; because the advertised and expected AS disagree, the BGP session cannot be brought up and PE-A and PE-B stop exchanging prefixes.\nFix: set the R2 neighbor's remote-as back to 100 on R4.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.2.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R2, R4 (2 instances):\n- R2: Changed state to NSR-Ready\n- R4: Changed state to NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

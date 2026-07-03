@@ -6,7 +6,7 @@
   "target_routers": [
     "R0"
   ],
-  "expected_rca": "Root cause: on R0 (PE-A), an IS-IS HMAC-MD5 hello-password (secret123) was added to GigabitEthernet0/0/0/1 (R0's only core link, to R2) while R2 has none.\nBecause the two ends disagree on IS-IS Hello authentication, each rejects the other's Hellos as failing the authentication invariant, so the Level-2 adjacency cannot form on that link and R0 is partitioned from the SR-MPLS underlay - its prefix-SID and loopback 192.0.2.10 are no longer advertised into the other routers' IGP tables.\nFix: remove the hello-password from R0's GigabitEthernet0/0/0/1.",
+  "expected_rca": "Root cause: on 100.64.0.100 (R0, PE-A), an IS-IS HMAC-MD5 hello-password (secret123) was added to GigabitEthernet0/0/0/1 (R0's only core link, to R2) while R2 has none.\nBecause the two ends disagree on IS-IS Hello authentication, each rejects the other's Hellos as failing the authentication invariant, so the Level-2 adjacency cannot form on that link and R0 is partitioned from the SR-MPLS underlay - its prefix-SID and loopback 192.0.2.10 are no longer advertised into the other routers' IGP tables.\nFix: remove the hello-password from R0's GigabitEthernet0/0/0/1.",
   "expected_symptoms_summary": "%ROUTING-ISIS-5-AUTH_FAILURE_DROP reported by R0 (1 instance):\n- R0: ISIS (LAB): Dropped P2P IIH from Gi0/0/0/1, R2 (0000.0000.0002), SNPA aac1.abc5.309a due to authentication TLV not found",
   "expected_state_diffs": [],
   "is_silent": false,

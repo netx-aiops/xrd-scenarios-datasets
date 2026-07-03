@@ -6,7 +6,7 @@
   "target_routers": [
     "R4"
   ],
-  "expected_rca": "Root cause: on R4 (PE2), the outbound route-policy PASS out toward R5 (CE2) in VRF CUSTOMER was replaced with a newly-created DENY policy that drops everything.\nThe eBGP session itself is unaffected, but the outbound policy filters every prefix before advertisement, so R4 advertises zero prefixes to R5 and CE2 loses its view of every other customer route (notably 10.10.0.1/32 from CE1) - a fat-finger policy that denied all instead of one prefix.\nFix: restore route-policy PASS out on R4's R5 (10.1.4.1) VRF CUSTOMER neighbor and remove the DENY policy.",
+  "expected_rca": "Root cause: on 100.64.0.104 (R4, PE2), the outbound route-policy PASS out toward R5 (CE2) in VRF CUSTOMER was replaced with a newly-created DENY policy that drops everything.\nThe eBGP session itself is unaffected, but the outbound policy filters every prefix before advertisement, so R4 advertises zero prefixes to R5 and CE2 loses its view of every other customer route (notably 10.10.0.1/32 from CE1) - a fat-finger policy that denied all instead of one prefix.\nFix: restore route-policy PASS out on R4's R5 (10.1.4.1) VRF CUSTOMER neighbor and remove the DENY policy.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; the eBGP\nsession stays Established and the breakage is policy-only.\nDiagnostic ground truth lives in expected_state_diffs.",
   "expected_state_diffs": [
     "R4 `show running-config route-policy DENY`: returns `drop`. Bound as outbound policy on the eBGP CE neighbor 10.1.4.1 in VRF CUSTOMER (baseline: `route-policy PASS out`).",

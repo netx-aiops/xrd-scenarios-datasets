@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 upper core) was lowered to 1400 while R3 stays at 1514, creating an asymmetric L3 MTU on the point-to-point link.\nSmall Hello PDUs still fit, but the oversize IS-IS CSNP/PSNP/LSP exchange exceeds R2's reduced MTU and is dropped, so the link-state databases cannot synchronize and the adjacency cannot reach full operation over that link; SPF therefore reroutes traffic between the PEs over the lower-core detour, forcing a mass SR label-stack recompute on every router.\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 upper core) was lowered to 1400 while R3 stays at 1514, creating an asymmetric L3 MTU on the point-to-point link.\nSmall Hello PDUs still fit, but the oversize IS-IS CSNP/PSNP/LSP exchange exceeds R2's reduced MTU and is dropped, so the link-state databases cannot synchronize and the adjacency cannot reach full operation over that link; SPF therefore reroutes traffic between the PEs over the lower-core detour, forcing a mass SR label-stack recompute on every router.\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; small IS-IS\nhello PDUs may still cross the asymmetric MTU and keep the adjacency\nUp, while large LSP/CSNP exchange fails. Diagnostic ground truth\nlives in expected_state_diffs.",
   "expected_state_diffs": [
     "R2 `show interfaces GigabitEthernet0/0/0/0`: MTU 1400 (baseline: 1514). R3's Gi0/0/0/0: default — asymmetric L3 MTU on a point-to-point link.",

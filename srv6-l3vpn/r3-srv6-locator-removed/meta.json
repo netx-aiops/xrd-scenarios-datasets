@@ -6,7 +6,7 @@
   "target_routers": [
     "R3"
   ],
-  "expected_rca": "Root cause: on R3 (P1), the SRv6 locator TRANSIT (prefix fcbb:bb00:3::/48) was removed, so R3 stops advertising the locator prefix and its IS-IS Locator-TLV disappears; R3 no longer offers End/End.X transit SIDs.\nSR policies relying on R3 as a TRANSIT hop lose their intermediate SIDs, while plain IPv6 IS-IS forwarding (and thus VPNv4 next-hop reachability) still works.\nFix: re-create the SRv6 locator TRANSIT (prefix fcbb:bb00:3::/48) and re-bind it under R3's IS-IS IPv6 AF.",
+  "expected_rca": "Root cause: on 100.64.0.103 (R3, P1), the SRv6 locator TRANSIT (prefix fcbb:bb00:3::/48) was removed, so R3 stops advertising the locator prefix and its IS-IS Locator-TLV disappears; R3 no longer offers End/End.X transit SIDs.\nSR policies relying on R3 as a TRANSIT hop lose their intermediate SIDs, while plain IPv6 IS-IS forwarding (and thus VPNv4 next-hop reachability) still works.\nFix: re-create the SRv6 locator TRANSIT (prefix fcbb:bb00:3::/48) and re-bind it under R3's IS-IS IPv6 AF.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; SRv6\nlocator removal is a quiet config event. The underlay impact is\nvisible via CLI probe. Diagnostic ground truth lives in\nexpected_state_diffs.",
   "expected_state_diffs": [
     "R3 `show segment-routing srv6 locator`: TRANSIT entry absent (baseline: `TRANSIT  fcbb:bb00:3::/48`).",

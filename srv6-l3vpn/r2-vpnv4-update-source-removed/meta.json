@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2 (PE1), update-source Loopback0 was removed from the VPNv4 iBGP neighbor toward R4 (fc00::4), so R2 sources the IPv6 session from a non-Loopback address instead of fc00::2.\nR4 expects neighbor fc00::2 and rejects the connection, so the VPNv4 session never establishes and no VPNv4 routes are exchanged - 10.20.0.5/32 (from CE2) never reaches PE1's VRF CUSTOMER and 10.10.0.1/32 (from CE1) never reaches PE2, leaving the end-to-end VPN dark.\nFix: restore update-source Loopback0 on R2's fc00::4 neighbor.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2, PE1), update-source Loopback0 was removed from the VPNv4 iBGP neighbor toward R4 (fc00::4), so R2 sources the IPv6 session from a non-Loopback address instead of fc00::2.\nR4 expects neighbor fc00::2 and rejects the connection, so the VPNv4 session never establishes and no VPNv4 routes are exchanged - 10.20.0.5/32 (from CE2) never reaches PE1's VRF CUSTOMER and 10.10.0.1/32 (from CE1) never reaches PE2, leaving the end-to-end VPN dark.\nFix: restore update-source Loopback0 on R2's fc00::4 neighbor.",
   "expected_symptoms_summary": "%SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL reported by R2 (1 instance):\n- R2: sshd[5836]: Connection closed by 100.64.0.2 port 60338\n\nBGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor fc00::4.\n- R4: neighbor fc00::2.",
   "expected_state_diffs": [],
   "is_silent": false,

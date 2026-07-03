@@ -6,7 +6,7 @@
   "target_routers": [
     "R4"
   ],
-  "expected_rca": "Root cause: on R4, the outbound route-policy PASS out toward R2 was replaced with a newly-created DENY policy that drops everything - a fat-finger policy change that denied all instead of one prefix.\nBecause the outbound policy filters every prefix before it is advertised, R4 propagates zero prefixes to R2 while the iBGP session itself remains up (the policy acts only on route advertisement, not on the session), so PE-A receives none of the PE-B-attached customer networks and cannot reach them.\nFix: restore route-policy PASS out on R4's R2 neighbor and remove the DENY policy.",
+  "expected_rca": "Root cause: on 100.64.0.104 (R4), the outbound route-policy PASS out toward R2 was replaced with a newly-created DENY policy that drops everything - a fat-finger policy change that denied all instead of one prefix.\nBecause the outbound policy filters every prefix before it is advertised, R4 propagates zero prefixes to R2 while the iBGP session itself remains up (the policy acts only on route advertisement, not on the session), so PE-A receives none of the PE-B-attached customer networks and cannot reach them.\nFix: restore route-policy PASS out on R4's R2 neighbor and remove the DENY policy.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.2.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R2, R4 (2 instances):\n- R2: Changed state to Not NSR-Ready\n- R4: Changed state to Not NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

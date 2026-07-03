@@ -6,7 +6,7 @@
   "target_routers": [
     "R3"
   ],
-  "expected_rca": "Root cause: on R3, GigabitEthernet0/0/0/1 (the R3<->R4 primary link, metric 10) was administratively shut down.\nShutting the interface tears down the R3<->R4 IS-IS adjacency, so that link can no longer carry the primary path; the pre-programmed TI-LFA backup on R2's Gi0/0/0/0 activates for sub-50ms protection, then SPF reconverges to promote the backup R2->R6->R7->R4 path (total metric 60) as the new primary. Reachability to R4 is preserved via the longer path.\nFix: no shutdown on R3's GigabitEthernet0/0/0/1.",
+  "expected_rca": "Root cause: on 100.64.0.103 (R3), GigabitEthernet0/0/0/1 (the R3<->R4 primary link, metric 10) was administratively shut down.\nShutting the interface tears down the R3<->R4 IS-IS adjacency, so that link can no longer carry the primary path; the pre-programmed TI-LFA backup on R2's Gi0/0/0/0 activates for sub-50ms protection, then SPF reconverges to promote the backup R2->R6->R7->R4 path (total metric 60) as the new primary. Reachability to R4 is preserved via the longer path.\nFix: no shutdown on R3's GigabitEthernet0/0/0/1.",
   "expected_symptoms_summary": "Interface state change (%PKT_INFRA-LINK-5-CHANGED):\n- R3: GigabitEthernet0/0/0/1 → Administratively Down.",
   "expected_state_diffs": [],
   "is_silent": false,

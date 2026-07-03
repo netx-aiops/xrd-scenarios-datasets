@@ -6,7 +6,7 @@
   "target_routers": [
     "R7"
   ],
-  "expected_rca": "Root cause: on R7 (secondary RR), the R6 neighbor was moved from the RR-CLIENT neighbor-group to RR-PEER, so R7 no longer reflects R6-originated prefixes to other clients.\nR3 (primary RR) still reflects R6's routes, so nothing breaks visibly, but redundancy is silently halved - if R3 or its R6 session is disrupted, R7's surviving path no longer reflects R6's prefixes to the rest of the AS.\nFix: move R6 back to the RR-CLIENT neighbor-group on R7.",
+  "expected_rca": "Root cause: on 100.64.0.107 (R7, secondary RR), the R6 neighbor was moved from the RR-CLIENT neighbor-group to RR-PEER, so R7 no longer reflects R6-originated prefixes to other clients.\nR3 (primary RR) still reflects R6's routes, so nothing breaks visibly, but redundancy is silently halved - if R3 or its R6 session is disrupted, R7's surviving path no longer reflects R6's prefixes to the rest of the AS.\nFix: move R6 back to the RR-CLIENT neighbor-group on R7.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R3: neighbor 192.0.2.6.\n- R4: neighbor 192.0.2.7.\n- R6: neighbor 192.0.2.3.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R6 (1 instance):\n- R6: Changed state to Not NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

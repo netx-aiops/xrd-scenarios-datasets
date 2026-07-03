@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, the eBGP neighbor toward R1 is configured with remote-as 65099 instead of R1's real AS 65001.\nThe AS that R2 expects no longer matches the AS R1 presents, so BGP's peer-AS check fails and the eBGP session cannot be established between R2 and R1.\nConsequence: with no established session, R1's eBGP-learned prefixes (192.88.99.0/32 ..) are not exchanged and drop out of the AS 65000 route-reflector mesh. Fix: set the R1 neighbor's remote-as back to 65001 on R2.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), the eBGP neighbor toward R1 is configured with remote-as 65099 instead of R1's real AS 65001.\nThe AS that R2 expects no longer matches the AS R1 presents, so BGP's peer-AS check fails and the eBGP session cannot be established between R2 and R1.\nConsequence: with no established session, R1's eBGP-learned prefixes (192.88.99.0/32 ..) are not exchanged and drop out of the AS 65000 route-reflector mesh. Fix: set the R1 neighbor's remote-as back to 65001 on R2.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R1: neighbor 192.0.0.6.\n- R2: neighbor 192.0.0.5.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R1 (1 instance):\n- R1: Changed state to NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

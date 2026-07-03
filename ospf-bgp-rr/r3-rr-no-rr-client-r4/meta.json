@@ -6,7 +6,7 @@
   "target_routers": [
     "R3"
   ],
-  "expected_rca": "Root cause: on R3 (primary RR), the R4 neighbor was moved from the RR-CLIENT neighbor-group to RR-PEER, so R3 no longer treats R4 as a route-reflector client.\nA route reflector only re-advertises prefixes learned from its clients, so once R4 is a plain peer R3 stops reflecting R4-originated prefixes to its other clients (R2, R6); R4 still reaches R7 (secondary RR, which keeps R4 as a client), so prefix flow survives but redundancy is silently halved - if R7 bounces, R4's prefixes vanish from the AS.\nFix: move R4 back to the RR-CLIENT neighbor-group on R3.",
+  "expected_rca": "Root cause: on 100.64.0.103 (R3, primary RR), the R4 neighbor was moved from the RR-CLIENT neighbor-group to RR-PEER, so R3 no longer treats R4 as a route-reflector client.\nA route reflector only re-advertises prefixes learned from its clients, so once R4 is a plain peer R3 stops reflecting R4-originated prefixes to its other clients (R2, R6); R4 still reaches R7 (secondary RR, which keeps R4 as a client), so prefix flow survives but redundancy is silently halved - if R7 bounces, R4's prefixes vanish from the AS.\nFix: move R4 back to the RR-CLIENT neighbor-group on R3.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R2: neighbor 192.0.2.3.\n- R3: neighbor 192.0.2.4.\n- R3: neighbor 192.0.2.4.",
   "expected_state_diffs": [],
   "is_silent": false,

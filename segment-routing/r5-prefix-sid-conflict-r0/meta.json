@@ -6,7 +6,7 @@
   "target_routers": [
     "R5"
   ],
-  "expected_rca": "Root cause: on R5 (PE-B), the Loopback0 prefix-SID was changed from index 15 to index 10, colliding with R0's existing index 10 (both map to label 16010).\nA prefix-SID index must be globally unique within the SR domain; because two loopbacks now claim the same SID label, the SR control plane cannot install both bindings and rejects the losing prefix-SID, so one PE's loopback loses SR reachability (only plain IP works) and end-to-end SR-TE between the PEs breaks.\nFix: restore R5's Loopback0 prefix-SID to index 15.",
+  "expected_rca": "Root cause: on 100.64.0.105 (R5, PE-B), the Loopback0 prefix-SID was changed from index 15 to index 10, colliding with R0's existing index 10 (both map to label 16010).\nA prefix-SID index must be globally unique within the SR domain; because two loopbacks now claim the same SID label, the SR control plane cannot install both bindings and rejects the losing prefix-SID, so one PE's loopback loses SR reachability (only plain IP works) and end-to-end SR-TE between the PEs breaks.\nFix: restore R5's Loopback0 prefix-SID to index 15.",
   "expected_symptoms_summary": "%ROUTING-ISIS-6-PREFIX_SID_INFO reported by R0, R1, R2 (3 instances):\n- R0: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16010 for algo SPF is used by 192.0.2.10/32 and 192.0.2.15/32'\n- R1: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16010 for algo SPF is used by 192.0.2.10/32 and 192.0.2.15/32'\n- R2: ISIS (LAB): Prefix SID info: 'Label Conflict: Prefix-SID label 16010 for algo SPF is used by 192.0.2.10/32 and 192.0.2.15/32'",
   "expected_state_diffs": [],
   "is_silent": false,

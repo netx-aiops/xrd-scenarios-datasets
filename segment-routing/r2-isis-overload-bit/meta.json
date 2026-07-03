@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, the IS-IS overload bit was set (set-overload-bit).\nR2 advertises its LSP with the OL bit, which by IS-IS SPF rules signals every other router to exclude R2 as a transit node, so no node computes a path through R2. R0 is single-homed to R2, so R0 cannot reach R3/R4/R5/R6/R7 and is isolated from the rest of the topology.\nFix: clear the overload bit (no set-overload-bit) on R2.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), the IS-IS overload bit was set (set-overload-bit).\nR2 advertises its LSP with the OL bit, which by IS-IS SPF rules signals every other router to exclude R2 as a transit node, so no node computes a path through R2. R0 is single-homed to R2, so R0 cannot reach R3/R4/R5/R6/R7 and is isolated from the rest of the topology.\nFix: clear the overload bit (no set-overload-bit) on R2.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; IS-IS\noverload-bit propagation is a quiet LSP attribute change.\nDiagnostic ground truth lives in expected_state_diffs.",
   "expected_state_diffs": [
     "R2 `show isis database verbose | inc Overload`: OL=1 (baseline: OL=0). On every other router, `show isis database R2` shows the same OL bit set in R2's LSP.",

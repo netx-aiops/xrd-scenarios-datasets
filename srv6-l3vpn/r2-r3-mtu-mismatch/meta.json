@@ -6,7 +6,7 @@
   "target_routers": [
     "R2"
   ],
-  "expected_rca": "Root cause: on R2, the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 IPv6 core) was lowered to 1400 while R3 stays at 1514.\nThe asymmetric L3 MTU means oversize IS-IS IPv6 DBD/LSP packets cannot traverse the link, so the two ends cannot complete database synchronization and the IS-IS adjacency cannot form. Without the adjacency the SRv6 underlay between PE1 and PE2 has no reachability, and once the IGP no longer carries fc00::4 the VPNv4-over-IPv6 iBGP session cannot stay up, so VPN prefixes stop propagating.\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), the MTU on GigabitEthernet0/0/0/0 (the R2<->R3 IPv6 core) was lowered to 1400 while R3 stays at 1514.\nThe asymmetric L3 MTU means oversize IS-IS IPv6 DBD/LSP packets cannot traverse the link, so the two ends cannot complete database synchronization and the IS-IS adjacency cannot form. Without the adjacency the SRv6 underlay between PE1 and PE2 has no reachability, and once the IGP no longer carries fc00::4 the VPNv4-over-IPv6 iBGP session cannot stay up, so VPN prefixes stop propagating.\nFix: remove the MTU override on R2's GigabitEthernet0/0/0/0 (restore 1514).",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; the\ndiagnostic ground truth lives in expected_state_diffs (CLI\nprobe outputs the agent should observe).",
   "expected_state_diffs": [
     "R2 `show interfaces GigabitEthernet0/0/0/0`: MTU 1400 (baseline: 1514). R3's Gi0/0/0/0: still default — asymmetric L3 MTU on a point-to-point link.",

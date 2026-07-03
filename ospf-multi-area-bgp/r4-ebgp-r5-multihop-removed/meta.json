@@ -6,7 +6,7 @@
   "target_routers": [
     "R4"
   ],
-  "expected_rca": "Root cause: on R4, `ebgp-multihop` was removed from the R5 eBGP neighbor while R4 still peers from Loopback0 (update-source Loopback0).\nWithout multihop, BGP packets toward R5's loopback 192.0.2.5 are sent with TTL=1 and are dropped before reaching R5 when the loopback path is more than one IP hop, so the eBGP session cannot be established and no routes are exchanged.\nFix: restore `ebgp-multihop` on R4's R5 neighbor.",
+  "expected_rca": "Root cause: on 100.64.0.104 (R4), `ebgp-multihop` was removed from the R5 eBGP neighbor (192.0.2.5).\nBecause R4 peers with R5 over its loopback, without multihop the BGP packets are sent with TTL=1 and are dropped before reaching R5 when the loopback path is more than one IP hop, so the eBGP session cannot be established and no routes are exchanged.\nFix: restore `ebgp-multihop` on R4's R5 neighbor.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R3: neighbor 192.0.2.4.\n- R3: neighbor 192.0.2.4.\n- R4: neighbor 192.0.2.3.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R4, R5 (3 instances):\n- R4: Changed state to NSR-Ready\n- R4: Changed state to Not NSR-Ready\n- R5: Changed state to NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,

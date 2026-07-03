@@ -6,7 +6,7 @@
   "target_routers": [
     "R3"
   ],
-  "expected_rca": "Root cause: on R3, the IS-IS metric on GigabitEthernet0/0/0/1 (the R3<->R4 primary) was raised to 16777214 (max) while R4's side stays at 10.\nIS-IS path cost is the sum of egress metrics, so the asymmetric metric drives the primary path cost (~16777224) far above the backup R2->R6->R7->R4 path cost (60). SPF therefore selects the cheaper backup as the steady-state best path and shuns the primary, which remains in the LSDB but carries no traffic - a subtle traffic-engineering misconfig.\nFix: restore the IS-IS metric to 10 on R3's GigabitEthernet0/0/0/1.",
+  "expected_rca": "Root cause: on 100.64.0.103 (R3), the IS-IS metric on GigabitEthernet0/0/0/1 (the R3<->R4 primary) was raised to 16777214 (max) while R4's side stays at 10.\nIS-IS path cost is the sum of egress metrics, so the asymmetric metric drives the primary path cost (~16777224) far above the backup R2->R6->R7->R4 path cost (60). SPF therefore selects the cheaper backup as the steady-state best path and shuns the primary, which remains in the LSDB but carries no traffic - a subtle traffic-engineering misconfig.\nFix: restore the IS-IS metric to 10 on R3's GigabitEthernet0/0/0/1.",
   "expected_symptoms_summary": "No fault syslog observed after apply — silent scenario; adjacency\nstays Up and only the link metric mutates. Diagnostic ground truth\nlives in expected_state_diffs.",
   "expected_state_diffs": [
     "R3 `show running-config router isis LAB interface GigabitEthernet0/0/0/1`: metric 16777214 (baseline: 10). R4's matching interface still advertises metric 10 — asymmetric metric on a point-to-point link.",

@@ -6,7 +6,7 @@
   "target_routers": [
     "R0"
   ],
-  "expected_rca": "Root cause: on R0 (CE1), the eBGP neighbor toward R2 (PE1) was reconfigured with remote-as 200 while R2 is AS 100.\nR0 now expects AS 200 but R2 identifies itself as AS 100, so the two ends disagree on R2's AS and BGP cannot establish the CE1<->PE1 eBGP session. R0's customer prefix 10.10.0.1/32 never enters PE1's VRF CUSTOMER, so it is never carried across the VPN to R4 (PE2) and R5 (CE2) cannot reach CE1.\nFix: set R0's R2 (10.1.1.0) neighbor remote-as back to 100.",
+  "expected_rca": "Root cause: on 100.64.0.100 (R0, CE1), the eBGP neighbor toward R2 (PE1) was reconfigured with remote-as 200 while R2 is AS 100.\nR0 now expects AS 200 but R2 identifies itself as AS 100, so the two ends disagree on R2's AS and BGP cannot establish the CE1<->PE1 eBGP session. R0's customer prefix 10.10.0.1/32 never enters PE1's VRF CUSTOMER, so it is never carried across the VPN to R4 (PE2) and R5 (CE2) cannot reach CE1.\nFix: set R0's R2 (10.1.1.0) neighbor remote-as back to 100.",
   "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R0: neighbor 10.1.1.0.\n- R2: neighbor 10.1.1.1.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R0 (1 instance):\n- R0: Changed state to NSR-Ready",
   "expected_state_diffs": [],
   "is_silent": false,
