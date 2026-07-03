@@ -1,0 +1,8 @@
+# Code owners for xrd-scenarios-datasets.
+#
+# Every pull request that modifies a matching path requires review and approval
+# from the listed owner(s) before it can be merged. This is enforced when the
+# branch ruleset on `main` has "Require review from Code Owners" enabled.
+
+# Default owner for everything in the repository — including all gold labels.
+* @tikoehle
