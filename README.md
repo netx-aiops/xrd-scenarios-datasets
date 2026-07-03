@@ -160,10 +160,10 @@ Golds are written in the identifiers an agent actually observes on-box:
 This is an **evaluation-only** benchmark: there is no `train` split, and the
 scenarios are intended to be treated as a sealed test set for reporting.
 
-If the dataset is used for prompt optimization, DSPy/GEPA optimization, retrieval
-tuning, symbolic-rule tuning, or judge calibration, the scenarios used for tuning
-**must be reported as a development split**, not as sealed held-out performance.
-Do not tune on a scenario and then report its score as zero-shot.
+If the dataset is used for prompt optimization, retrieval tuning, symbolic-rule tuning, 
+or judge calibration, the scenarios used for tuning **must be reported as a development split**, 
+not as sealed held-out performance.
+**Do not tune on a scenario and then report its score as zero-shot.**
 
 ## Dataset Creation
 
