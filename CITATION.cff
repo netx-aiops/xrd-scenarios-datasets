@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this dataset, please cite it as below."
 title: "XRd Scenario Datasets: Autonomous Network RCA Evaluation Golds"
 abstract: >-
-  A gold-standard benchmark of 60 IOS-XR network fault scenarios across 6
+  A gold-standard benchmark of 70 IOS-XR network fault scenarios across 7
   topology profiles, for evaluating autonomous root-cause-analysis agents against
   a live network. Each scenario injects one reproducible fault and pairs it with a
   ground-truth-blind question and an engineer-written gold RCA scored by a
@@ -11,8 +11,8 @@ type: dataset
 authors:
   - family-names: Koehler
     given-names: Timo
-version: 1.0.0
-date-released: "2026-07-03"
+version: 1.1.0
+date-released: "2026-07-06"
 license: CC-BY-4.0
 repository-code: "https://github.com/netx-aiops/xrd-scenarios-datasets"
 keywords:

@@ -38,12 +38,12 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 - **Language:** English, with IOS-XR CLI / network configuration
 - **License:** CC-BY-4.0 (data & documentation); Apache-2.0 (any bundled code)
 - **Repository:** <https://github.com/netx-aiops/xrd-scenarios-datasets>
-- **Version:** 1.0.0
+- **Version:** 1.1.0
 - **Point of contact:** the repository issue tracker
 
 ## Dataset Summary
 
-60 curated network fault scenarios across 6 IOS-XR network profiles (topologies),
+70 curated network fault scenarios across 7 IOS-XR network profiles (topologies),
 10 each. Each scenario is a self-contained manifest describing one injected fault,
 the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
 and the exact CLI to inject and revert the fault on the live lab.
@@ -52,6 +52,7 @@ and the exact CLI to inject and revert the fault on the live lab.
 | --- | --- |
 | `simple-bgp` | OSPF underlay + iBGP PE–PE |
 | `ospf-multi-area-bgp` | multi-area OSPF + eBGP/iBGP + route reflection |
+| `ospf-multi-area-bgp-cdp` | CDP twin of `ospf-multi-area-bgp` — same faults/golds, CDP (not LLDP) as the L2 discovery protocol |
 | `ospf-bgp-rr` | dual route-reflector iBGP |
 | `isis-ipfrr` | IS-IS + TI-LFA fast-reroute |
 | `segment-routing` | IS-IS Segment Routing (SR-MPLS) |
@@ -63,6 +64,13 @@ route-reflector-client, route-policy, TCP-MD5), and SR / SRv6 (prefix-SID
 conflict, SRGB shift, locator prefix). Several scenarios inject a **deliberately
 inert** change — no operational impact — to test an agent's resistance to false
 positives.
+
+Transparency note: `ospf-multi-area-bgp-cdp` (added in v1.1.0) duplicates the
+`ospf-multi-area-bgp` faults and golds verbatim on a lab twin whose only delta
+is the L2 discovery protocol (CDP enabled, LLDP absent — the Cisco-only
+operator model). It probes an agent's topology-discovery robustness, not new
+fault classes; aggregate scores that treat every scenario as independent
+should weight it accordingly.
 
 ## Supported Tasks and Intended Use
 
@@ -188,7 +196,7 @@ auditable recalibration diff.
 ## Known Limitations
 
 - **Single vendor:** IOS-XR only; no cross-vendor coverage.
-- **Bounded topology space:** 6 profiles, 8-router labs; limited multi-fault and
+- **Bounded topology space:** 7 profiles, 8-router labs; limited multi-fault and
   ambiguous cases.
 - **Prose-first gold:** the gold is a human-readable `expected_rca` (plus a
   symptom signature). It does **not yet** ship the fuller "gold in three layers"
