@@ -1,0 +1,33 @@
+{
+  "profile": "ospf-multi-area-bgp-cdp",
+  "scenario": "r3-r2-md5-key-rotation",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 rotates the OSPF MD5 key on GigabitEthernet0/0/0/0 (R3↔R2, Area 0)\nfrom `cisco123` to `wrongkey` without coordinating with R2, which keeps\n`cisco123`. OSPF Hellos signed with the new key fail R2's HMAC\nverification (and vice-versa). The adjacency drops out of FULL with\nauthentication errors logged on the receiving side. Classic key-rotation\noutage when one router is forgotten in the rollout.",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on 100.64.0.103 (R3), the OSPF MD5 key on GigabitEthernet0/0/0/0 (the R3<->R2 link, area 0) was rotated to `wrongkey` while R2 still uses `cisco123`.\nThe two ends now disagree on the MD5 key, so each side's HMAC verification of the other's OSPF packets fails; OSPF cannot maintain an authenticated adjacency on that link and routes stop being exchanged across it.\nFix: restore the matching MD5 key (cisco123) on R3's GigabitEthernet0/0/0/0.",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE):\n- R1: neighbor 192.0.0.6.\n- R2: neighbor 192.0.0.5.\n\n%ROUTING-BGP-5-NSR_STATE_CHANGE reported by R1 (1 instance):\n- R1: Changed state to Not NSR-Ready\n\nOSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R2: neighbor 192.0.2.3 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"dead timer expired\".\n- R3: neighbor 192.0.2.2 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"dead timer expired\".\n- Bilateral: both ends (R2, R3) report the transition.",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter ospf 100\narea 0\ninterface GigabitEthernet0/0/0/0\n message-digest-key 1 md5 wrongkey\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter ospf 100\narea 0\ninterface GigabitEthernet0/0/0/0\n message-digest-key 1 md5 cisco123\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:43:57.187 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.0.6 Up (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:May 17 13:43:57.189 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.0.5 Up (VRF: default) (AS: 65001)",
+    "RP/0/RP0/CPU0:May 17 13:43:57.194 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready",
+    "RP/0/RP0/CPU0:May 17 13:44:06.422 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.3 on GigabitEthernet0/0/0/0 in area 0 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000",
+    "RP/0/RP0/CPU0:May 17 13:44:02.356 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.2 on GigabitEthernet0/0/0/0 in area 0 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000"
+  ]
+}

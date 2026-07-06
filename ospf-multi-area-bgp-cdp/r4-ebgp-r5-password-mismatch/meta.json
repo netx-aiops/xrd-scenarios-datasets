@@ -1,0 +1,31 @@
+{
+  "profile": "ospf-multi-area-bgp-cdp",
+  "scenario": "r4-ebgp-r5-password-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R4 rotates the eBGP TCP-MD5 password on its multihop session toward R5\nfrom `cisco456` to `cisco789` without updating R5. The TCP segments\ncarrying BGP OPEN are signed with a key R5 cannot verify; R5 silently\ndrops them. The session goes Idle on both sides after the keepalive\ntimer fires. AS 65002's customer prefixes (192.88.99.11/32 .. .20/32)\nvanish from the AS 65000 RR mesh.",
+  "target_routers": [
+    "R4"
+  ],
+  "expected_rca": "Root cause: on 100.64.0.104 (R4), the eBGP TCP-MD5 password on the R5 multihop session was changed to `cisco789` while R5 still uses `cisco456`.\nBecause the two ends sign and authenticate their TCP segments with different keys, neither side can verify the other's segments, so the BGP OPEN cannot be exchanged and the eBGP session toward R5 cannot establish; consequently AS 65002's customer prefixes (192.88.99.11/32 .. .20/32) are no longer advertised into the AS 65000 mesh.\nFix: restore the matching TCP-MD5 password on R4's R5 neighbor.",
+  "expected_symptoms_summary": "%IP-TCP-3-BADAUTH reported by R4, R5 (3 instances):\n- R4: Invalid MD5 digest from 192.0.2.5:24544 to 192.0.2.4:179 for vrf:default (0x60000000)\n- R4: Invalid MD5 digest from 192.0.2.5:24544 to 192.0.2.4:179 for vrf:default (0x60000000)\n- R5: Invalid MD5 digest from 192.0.2.4:48794 to 192.0.2.5:179 for vrf:default (0x60000000)",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.5\n password clear cisco789\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\nrouter bgp 65000\nneighbor 192.0.2.5\n password clear cisco456\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:47:13.080 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.5:24544 to 192.0.2.4:179 for vrf:default (0x60000000)",
+    "RP/0/RP0/CPU0:May 17 13:47:27.077 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.5:24544 to 192.0.2.4:179 for vrf:default (0x60000000)",
+    "RP/0/RP0/CPU0:May 17 13:47:06.182 UTC: tcp[193]: %IP-TCP-3-BADAUTH : Invalid MD5 digest from 192.0.2.4:48794 to 192.0.2.5:179 for vrf:default (0x60000000)"
+  ]
+}

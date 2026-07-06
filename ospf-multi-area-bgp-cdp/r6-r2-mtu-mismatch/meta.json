@@ -1,0 +1,29 @@
+{
+  "profile": "ospf-multi-area-bgp-cdp",
+  "scenario": "r6-r2-mtu-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R6 lowers MTU on GigabitEthernet0/0/0/0 (the R6↔R2 link, Area 0)\nfrom 1514 to 1400 while R2's matching interface stays at 1514. OSPF\nexchanges DBD (database description) packets sized to the larger MTU;\nR6 cannot reassemble or accept the oversize packets. The neighbor\nstalls in EXSTART/EXCHANGE and never reaches FULL. Adjacency\noscillates as both sides retransmit. Iconic \"ping works, OSPF\ndoesn't\" production scenario.",
+  "target_routers": [
+    "R6"
+  ],
+  "expected_rca": "Root cause: on 100.64.0.106 (R6), the MTU on GigabitEthernet0/0/0/0 (the R6<->R2 link, area 0) was lowered to 1400 while R2's side stays at 1514.\nOSPF requires both ends of a link to agree on the interface MTU before completing database synchronization; with the two sides mismatched, R6 cannot accept the larger-MTU database-description packets R2 sends, so the adjacency cannot complete synchronization and no routes are exchanged over that link. IP forwarding below the smaller MTU is unaffected, so only OSPF route exchange is broken.\nFix: set R6's GigabitEthernet0/0/0/0 MTU back to 1514 so both ends agree.",
+  "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R6: neighbor 192.0.2.2 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"interface down or detached\".",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "apply": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n mtu 1400\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/0\n no mtu\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:May 17 13:49:08.405 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.2 on GigabitEthernet0/0/0/0 in area 0 from FULL to DOWN, Neighbor Down: interface down or detached, vrf default vrfid 0x60000000"
+  ]
+}
