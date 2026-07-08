@@ -43,8 +43,8 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 
 ## Dataset Summary
 
-70 curated network fault scenarios across 7 IOS-XR network profiles (topologies),
-10 each. Each scenario is a self-contained manifest describing one injected fault,
+66 curated network fault scenarios across 7 IOS-XR network profiles (topologies),
+9–10 per profile. Each scenario is a self-contained manifest describing one injected fault,
 the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
 and the exact CLI to inject and revert the fault on the live lab.
 
@@ -61,9 +61,9 @@ and the exact CLI to inject and revert the fault on the live lab.
 Fault classes span IGP adjacency (area / MTU / authentication / hello-timer /
 circuit-type), BGP session and policy (AS mismatch, update-source,
 route-reflector-client, route-policy, TCP-MD5), and SR / SRv6 (prefix-SID
-conflict, SRGB shift, locator prefix). Several scenarios inject a **deliberately
-inert** change — no operational impact — to test an agent's resistance to false
-positives.
+conflict, SRGB shift, locator prefix). Several faults are **silent** — no fault
+syslog fires and the ground truth lives in the operational state diff — to test
+agents that must reason beyond the log stream.
 
 Transparency note: `ospf-multi-area-bgp-cdp` (added in v1.1.0) duplicates the
 `ospf-multi-area-bgp` faults and golds verbatim on a lab twin whose only delta
@@ -81,7 +81,7 @@ dataset is intended for:
 2. measuring semantic fact coverage (recall) and claim support (precision);
 3. regression-testing RCA pipelines across releases;
 4. comparing prompt, planner, memory, retrieval, and tool-use strategies;
-5. probing false-positive resistance via the inert-change scenarios.
+5. probing state-diff reasoning via the silent (no-syslog) scenarios.
 
 It is an **evaluation** dataset, **not** intended for model pretraining or
 fine-tuning.
