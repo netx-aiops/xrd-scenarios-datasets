@@ -223,7 +223,7 @@ The dataset follows semantic versioning:
 - **minor** — added scenarios or backward-compatible fields;
 - **major** — changed gold labels, changed scoring semantics, or removed scenarios.
 
-Current release: **v1.0.0**.
+Current release: **v1.1.0**.
 
 ## Citation
 
@@ -232,7 +232,7 @@ Current release: **v1.0.0**.
   title     = {XRd Scenario Datasets: Autonomous Network RCA Evaluation Golds},
   author    = {Koehler, Timo},
   year      = {2026},
-  version   = {1.0.0},
+  version   = {1.1.0},
   license   = {CC-BY-4.0},
   url       = {https://github.com/netx-aiops/xrd-scenarios-datasets}
 }
@@ -254,5 +254,5 @@ give appropriate credit, link the license, and indicate changes. See
 
 Suggested attribution:
 
-> XRd Scenario Datasets v1.0.0, created by Timo Koehler (netx-aiops), licensed
+> XRd Scenario Datasets v1.1.0, created by Timo Koehler (netx-aiops), licensed
 > under CC-BY-4.0.
