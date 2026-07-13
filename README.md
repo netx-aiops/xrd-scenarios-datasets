@@ -43,7 +43,7 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 
 ## Dataset Summary
 
-66 curated network fault scenarios across 7 IOS-XR network profiles (topologies),
+67 curated network fault scenarios across 7 IOS-XR network profiles (topologies),
 9–10 per profile. Each scenario is a self-contained manifest describing one injected fault,
 the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
 and the exact CLI to inject and revert the fault on the live lab.
@@ -113,6 +113,7 @@ Each `meta.json` is a self-contained scenario manifest:
 | `expected_state_diffs` | expected operational state changes (where captured) |
 | `apply`, `revert` | the exact IOS-XR CLI to inject / undo the fault on the live lab |
 | `mode`, `is_silent` | delivery mode (`live`); whether the fault is log-silent |
+| `symptom_capture_grace_seconds` | the symptom-capture window for the ground-truth verifier (`xrd-vlab scripts/scenario_verify.py`): after the FIRST new syslog appears post-apply, keep collecting this many seconds before concluding the capture. Some faults have a **staggered** symptom distribution — an immediate local event plus a protocol-timer-driven peer event (e.g. `r3-r2-passive-interface`: the passive end logs at config time, the peer's dead-timer ADJCHG lands ~40 s later) — and a too-short window would observe only the first line and silently under-represent the gold. The window travels with the scenario so re-verification never depends on an operator remembering a flag; an explicit `--grace` on the verifier CLI overrides it. 60 s covers one OSPF dead interval with margin. |
 
 The **input** an agent is given is `(profile, question)` only; every other field
 is held out as ground truth. `expected_rca` is the single field the scoring metric

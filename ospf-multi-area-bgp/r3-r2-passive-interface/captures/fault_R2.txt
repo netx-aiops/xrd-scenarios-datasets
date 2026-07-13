@@ -1,0 +1,121 @@
+===== R2 fault-state 2026-07-13T15:22:40Z =====
+
+----- CMD: show ospf neighbor -----
+
+----------------------------- show ospf neighbor ------------------------------
+
+* Indicates MADJ interface
+# Indicates Neighbor awaiting BFD session up
+
+Neighbors for OSPF 100
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.0.2.6       1     FULL/BDR        00:00:31    192.0.0.14      GigabitEthernet0/0/0/1
+    Neighbor is up for 5d07h
+192.0.2.1       1     FULL/BDR        00:00:35    192.0.0.5       GigabitEthernet0/0/0/2
+    Neighbor is up for 5d07h
+192.0.2.0       1     FULL/BDR        00:00:35    192.0.0.1       GigabitEthernet0/0/0/3
+    Neighbor is up for 6d21h
+
+Total neighbor count: 3
+
+----- CMD: show ospf interface brief -----
+
+-------------------------- show ospf interface brief --------------------------
+
+* Indicates MADJ interface, (P) Indicates fast detect hold down state
+
+Interfaces for OSPF 100
+
+Interface          PID   Area            IP Address/Mask    Cost  State Nbrs F/C
+Gi0/0/0/0          100   0               192.0.0.9/30       1     DR    0/0
+Gi0/0/0/1          100   0               192.0.0.13/30      1     DR    1/1
+Lo0                100   1               192.0.2.2/32       1     LOOP  0/0
+Gi0/0/0/2          100   1               192.0.0.6/30       1     DR    1/1
+Gi0/0/0/3          100   1               192.0.0.2/30       1     DR    1/1
+
+----- CMD: show ospf interface GigabitEthernet0/0/0/0 -----
+
+----------------- show ospf interface GigabitEthernet0/0/0/0 ------------------
+
+GigabitEthernet0/0/0/0 is up, line protocol is up 
+  Internet Address 192.0.0.9/30, Area 0, SID 0, Strict-SPF SID 0
+  Label stack Primary label 0 Backup label 0 SRTE label 0
+  Process ID 100, Router ID 192.0.2.2, Network Type BROADCAST, Cost: 1
+  Transmit Delay is 1 sec, State DR, Priority 1, MTU 1500, MaxPktSz 1500
+  Forward reference No, Unnumbered no,  Bandwidth 1000000 
+  RIB LC sync Yes
+  Designated Router (ID) 192.0.2.2, Interface address 192.0.0.9
+  No backup designated router on this network
+  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
+    Hello due in 00:00:01:351
+  Index 1/1, flood queue length 0
+  Next 0(0)/0(0)
+  Last flood scan length is 5, maximum is 5
+  Last flood scan time is 0 msec, maximum is 0 msec
+  LS Ack List: current length 0, high water mark 10
+  Neighbor Count is 0, Adjacent neighbor count is 0
+  Suppress hello for 0 neighbor(s)
+  Message digest authentication enabled
+    Youngest key id is 1
+  Multi-area interface Count is 0
+  Segment Routing Forwarding MPLS enabled: Yes
+  Adjacency hold timer expired last : Never
+  Exchange timer expired last : Never
+
+----- CMD: show running-config router ospf -----
+
+----------------------- show running-config router ospf -----------------------
+router ospf 100
+ router-id 192.0.2.2
+ area 0
+  authentication message-digest
+  interface GigabitEthernet0/0/0/0
+   message-digest-key 1 md5 encrypted 030752180500701E1D
+  !
+  interface GigabitEthernet0/0/0/1
+   message-digest-key 1 md5 encrypted 094F471A1A0A464058
+  !
+ !
+ area 1
+  authentication message-digest
+  interface Loopback0
+   passive enable
+  !
+  interface GigabitEthernet0/0/0/2
+   message-digest-key 1 md5 encrypted 104D000A061843595F
+  !
+  interface GigabitEthernet0/0/0/3
+   message-digest-key 1 md5 encrypted 110A1016141D5A5E57
+  !
+ !
+!
+
+
+----- CMD: show logging last 15 -----
+
+---------------------------- show logging last 15 -----------------------------
+Syslog logging: enabled (0 messages dropped, 0 flushes, 0 overruns)
+    Console logging: level warnings, 16 messages logged
+    Monitor logging: level debugging, 0 messages logged
+    Trap logging: level debugging, 242 messages logged
+    Logging to 100.64.0.2, 242 message lines logged
+    Buffer logging: level debugging, 293 messages logged
+
+Log Buffer (2097152 bytes):
+
+RP/0/RP0/CPU0:Jul 13 01:37:27.908 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =129 
+RP/0/RP0/CPU0:Jul 13 02:37:27.948 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =130 
+RP/0/RP0/CPU0:Jul 13 03:37:27.996 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =131 
+RP/0/RP0/CPU0:Jul 13 04:37:27.610 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =132 
+RP/0/RP0/CPU0:Jul 13 05:37:27.124 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =133 
+RP/0/RP0/CPU0:Jul 13 06:37:27.942 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =134 
+RP/0/RP0/CPU0:Jul 13 07:37:27.255 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =135 
+RP/0/RP0/CPU0:Jul 13 08:37:27.908 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =136 
+RP/0/RP0/CPU0:Jul 13 09:37:27.174 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =137 
+RP/0/RP0/CPU0:Jul 13 10:37:27.160 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =138 
+RP/0/RP0/CPU0:Jul 13 11:37:27.525 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =139 
+RP/0/RP0/CPU0:Jul 13 12:37:27.105 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =140 
+RP/0/RP0/CPU0:Jul 13 13:37:27.199 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =141 
+RP/0/RP0/CPU0:Jul 13 14:37:27.178 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[154402]: Server initiated time rekey for session=10000006, session_rekey_count =142 
+RP/0/RP0/CPU0:Jul 13 15:22:20.043 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.3 on GigabitEthernet0/0/0/0 in area 0 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000 

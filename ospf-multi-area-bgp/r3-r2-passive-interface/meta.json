@@ -1,0 +1,31 @@
+{
+  "profile": "ospf-multi-area-bgp",
+  "scenario": "r3-r2-passive-interface",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R3 sets `passive enable` on GigabitEthernet0/0/0/0 (the R3↔R2 link,\nArea 0) under router ospf 100; R2 keeps its side active. A passive\nOSPF interface stops sending Hellos and forms no adjacency: R3 tears\nthe R2 adjacency down immediately at config time (reason \"interface\ndown or detached\"), and R2 — no longer receiving Hellos — declares the\nneighbor down about one dead interval (~40 s) later (reason \"dead\ntimer expired\"). The interface itself stays up. Unlike the\narea-mismatch fault on the same link there are NO %ROUTING-OSPF-4-ERRRCV\npacket errors and no BGP session flaps (loopback reachability reroutes\nvia R3's other area-0 link).",
+  "target_routers": [
+    "R3"
+  ],
+  "expected_rca": "Root cause: on 100.64.0.103 (R3), interface GigabitEthernet0/0/0/0 (the R3<->R2 link, area 0) was set to OSPF passive (`passive enable` under router ospf 100), while R2 keeps that link active.\nA passive OSPF interface sends no Hellos and forms no adjacency: R3 drops the adjacency to R2 immediately, and R2, no longer hearing Hellos from R3, declares the neighbor down when its dead timer expires. The R2<->R3 adjacency over GigabitEthernet0/0/0/0 cannot re-form and no routes are exchanged across that link; the interface itself remains up and there is no area or authentication mismatch.\nFix: remove the passive override on R3's GigabitEthernet0/0/0/0 (`no passive` under router ospf 100 area 0) so Hellos resume and the adjacency reforms.",
+  "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R3: neighbor 192.0.2.2 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"interface down or detached\" — immediate, at config-commit time (the passive end drops first).\n- R2: neighbor 192.0.2.3 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"dead timer expired\" — about one dead interval later (the peer times out).\n\nAbsent by design (discriminators vs the area-mismatch fault on the same link):\n- No OSPF packet receive errors (%ROUTING-OSPF-4-ERRRCV mismatch area ID) on either end.\n- No BGP session state changes (loopback reachability reroutes via R3's other area-0 link).",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "symptom_capture_grace_seconds": 60,
+  "apply": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter ospf 100\narea 0\ninterface GigabitEthernet0/0/0/0\n passive enable\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R3",
+      "commands": "configure terminal\nrouter ospf 100\narea 0\ninterface GigabitEthernet0/0/0/0\n no passive\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:Jul 13 15:21:47.188 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.2 on GigabitEthernet0/0/0/0 in area 0 from FULL to DOWN, Neighbor Down: interface down or detached, vrf default vrfid 0x60000000",
+    "RP/0/RP0/CPU0:Jul 13 15:22:20.043 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.3 on GigabitEthernet0/0/0/0 in area 0 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000"
+  ]
+}

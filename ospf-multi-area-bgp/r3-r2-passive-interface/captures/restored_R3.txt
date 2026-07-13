@@ -1,0 +1,103 @@
+===== R3 restored 2026-07-13T15:24:14Z =====
+
+----- CMD: show running-config router ospf -----
+
+----------------------- show running-config router ospf -----------------------
+router ospf 100
+ router-id 192.0.2.3
+ area 0
+  authentication message-digest
+  interface Loopback0
+   passive enable
+  !
+  interface GigabitEthernet0/0/0/0
+   message-digest-key 1 md5 encrypted 060506324F41584B56
+  !
+  interface GigabitEthernet0/0/0/1
+   message-digest-key 1 md5 encrypted 14141B180F0B7B7977
+  !
+ !
+ area 1
+ !
+!
+
+
+----- CMD: show ospf neighbor -----
+
+----------------------------- show ospf neighbor ------------------------------
+
+* Indicates MADJ interface
+# Indicates Neighbor awaiting BFD session up
+
+Neighbors for OSPF 100
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.0.2.2       1     FULL/DR         00:00:35    192.0.0.9       GigabitEthernet0/0/0/0
+    Neighbor is up for 00:00:32
+192.0.2.4       1     FULL/DR         00:00:39    192.0.0.18      GigabitEthernet0/0/0/1
+    Neighbor is up for 6d21h
+
+Total neighbor count: 2
+
+----- CMD: show ospf interface -----
+
+----------------------------- show ospf interface -----------------------------
+
+Interfaces for OSPF 100
+
+Loopback0 is up, line protocol is up 
+  Internet Address 192.0.2.3/32, Area 0, SID 0, Strict-SPF SID 0
+  Label stack Primary label 0 Backup label 0 SRTE label 0
+  Process ID 100, Router ID 192.0.2.3, Network Type LOOPBACK, Cost: 1
+  Loopback interface is treated as a stub Host
+  Multi-area interface Count is 0
+GigabitEthernet0/0/0/0 is up, line protocol is up 
+  Internet Address 192.0.0.10/30, Area 0, SID 0, Strict-SPF SID 0
+  Label stack Primary label 0 Backup label 0 SRTE label 0
+  Process ID 100, Router ID 192.0.2.3, Network Type BROADCAST, Cost: 1
+  Transmit Delay is 1 sec, State BDR, Priority 1, MTU 1500, MaxPktSz 1500
+  Forward reference No, Unnumbered no,  Bandwidth 1000000 
+  RIB LC sync Yes
+  Designated Router (ID) 192.0.2.2, Interface address 192.0.0.9
+  Backup Designated router (ID) 192.0.2.3, Interface address 192.0.0.10
+  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
+    Hello due in 00:00:04:355
+  Index 1/1, flood queue length 0
+  Next 0(0)/0(0)
+  Last flood scan length is 1, maximum is 6
+  Last flood scan time is 0 msec, maximum is 1 msec
+  LS Ack List: current length 0, high water mark 10
+  Neighbor Count is 1, Adjacent neighbor count is 1
+    Adjacent with neighbor 192.0.2.2  (Designated Router)
+  Suppress hello for 0 neighbor(s)
+  Message digest authentication enabled
+    Youngest key id is 1
+  Multi-area interface Count is 0
+  Segment Routing Forwarding MPLS enabled: Yes
+  Adjacency hold timer expired last : Never
+  Exchange timer expired last : Never
+GigabitEthernet0/0/0/1 is up, line protocol is up 
+  Internet Address 192.0.0.17/30, Area 0, SID 0, Strict-SPF SID 0
+  Label stack Primary label 0 Backup label 0 SRTE label 0
+  Process ID 100, Router ID 192.0.2.3, Network Type BROADCAST, Cost: 1
+  Transmit Delay is 1 sec, State BDR, Priority 1, MTU 1500, MaxPktSz 1500
+  Forward reference No, Unnumbered no,  Bandwidth 1000000 
+  RIB LC sync Yes
+  Designated Router (ID) 192.0.2.4, Interface address 192.0.0.18
+  Backup Designated router (ID) 192.0.2.3, Interface address 192.0.0.17
+  Timer intervals configured, Hello 10, Dead 40, Wait 40, Retransmit 5
+    Hello due in 00:00:04:700
+  Index 2/2, flood queue length 0
+  Next 0(0)/0(0)
+  Last flood scan length is 2, maximum is 13
+  Last flood scan time is 0 msec, maximum is 0 msec
+  LS Ack List: current length 0, high water mark 8
+  Neighbor Count is 1, Adjacent neighbor count is 1
+    Adjacent with neighbor 192.0.2.4  (Designated Router)
+  Suppress hello for 0 neighbor(s)
+  Message digest authentication enabled
+    Youngest key id is 1
+  Multi-area interface Count is 0
+  Segment Routing Forwarding MPLS enabled: Yes
+  Adjacency hold timer expired last : Never
+  Exchange timer expired last : Never

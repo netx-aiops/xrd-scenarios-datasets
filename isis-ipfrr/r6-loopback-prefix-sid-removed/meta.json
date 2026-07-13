@@ -16,6 +16,7 @@
   ],
   "is_silent": true,
   "mode": "live",
+  "symptom_capture_grace_seconds": 60,
   "apply": [
     {
       "device": "R6",
