@@ -6,7 +6,7 @@
   "target_routers": [
     "R6"
   ],
-  "expected_rca": "Root cause: on 100.64.0.106 (R6), the MTU on GigabitEthernet0/0/0/0 (the R6<->R2 link, area 0) was lowered to 1400 while R2's side stays at 1514 (the Layer-2 interface MTUs; OSPF advertises the IP MTU, 14 bytes lower on Ethernet, so R6 offers 1386 against R2's 1500).\nOSPF requires both ends of a link to agree on the interface MTU before completing database synchronization; with the two sides mismatched, R6 cannot accept the larger-MTU database-description packets R2 sends, so the adjacency cannot complete synchronization and no routes are exchanged over that link. IP forwarding below the smaller MTU is unaffected, so only OSPF route exchange is broken.\nFix: set R6's GigabitEthernet0/0/0/0 MTU back to 1514 so both ends agree.",
+  "expected_rca": "Root cause: on 100.64.0.106 (R6), the OSPF interface MTU on GigabitEthernet0/0/0/0 (the R6<->R2 link, area 0) was lowered to 1386 while the far end, GigabitEthernet0/0/0/1 on 100.64.0.102 (R2), offers 1500.\nBecause the two ends of the link disagree on the interface MTU, database synchronization (the Database Description exchange) cannot complete, so the adjacency never reaches FULL and no routes are exchanged over that link.\nFix: restore the MTU on R6 GigabitEthernet0/0/0/0 so both ends agree (OSPF MTU 1500; on XR, interface `mtu 1514`).",
   "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R6: neighbor 192.0.2.2 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"interface down or detached\".",
   "expected_state_diffs": [],
   "is_silent": false,
