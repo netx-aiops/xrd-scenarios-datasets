@@ -51,7 +51,7 @@ def main() -> None:
                           f"{data.get('scenario')!r} != directory {m.parents[0].name!r}")
 
     citation = (ROOT / "CITATION.cff").read_text()
-    m_count = re.search(r"(\d+)\s+IOS-XR network fault scenarios", citation)
+    m_count = re.search(r"(\d+)\s+Cisco IOS-XR/IOS-XE network fault scenarios", citation)
     m_prof = re.search(r"across\s+(\d+)\s+topology profiles", citation)
     m_ver = re.search(r"^version:\s*([0-9]+\.[0-9]+\.[0-9]+)\s*$", citation, re.M)
     m_date = re.search(r'^date-released:\s*"([0-9]{4}-[0-9]{2}-[0-9]{2})"\s*$', citation, re.M)

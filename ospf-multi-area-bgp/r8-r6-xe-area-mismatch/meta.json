@@ -1,0 +1,31 @@
+{
+  "profile": "ospf-multi-area-bgp",
+  "scenario": "r8-r6-xe-area-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "Mixed IOS-XR/IOS-XE fault: move R8's R8↔R6 link (Ethernet0/1) from\nOSPF Area 3 to Area 4 on the IOS-XE (IOL) router R8; R6 (IOS-XR)\nkeeps its side (GigabitEthernet0/0/0/2) in Area 3. The two ends now\ndisagree on the area ID, each rejects the other's Hellos, and the\nR6↔R8 adjacency drops — producing syslog in BOTH dialects: IOS-XE\n%OSPF-* lines on R8 and IOS-XR %ROUTING-OSPF-* lines on R6.",
+  "target_routers": [
+    "R8"
+  ],
+  "expected_rca": "Root cause: on 100.64.0.108 (R8), interface Ethernet0/1 (the R8<->R6 link) was moved from OSPF area 3 into area 4, while R6 keeps its end of that link (GigabitEthernet0/0/0/2) in area 3.\nThe two ends now disagree on the area ID for the link; OSPF requires both neighbors on a link to share the same area ID, so each end rejects the other's Hellos, the R6<->R8 adjacency over Ethernet0/1 cannot form, and no routes are exchanged across that link.\nFix: return R8's Ethernet0/1 to OSPF area 3.",
+  "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R6: neighbor 192.0.2.8 on GigabitEthernet0/0/0/2 (area 3) FULL → DOWN reason \"dead timer expired\".\n\nOSPF adjacency state change (%OSPF-5-ADJCHG):\n- R8: neighbor 192.0.2.6 on Ethernet0/1 FULL → DOWN reason \"Interface down or detached\".\n",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "symptom_capture_grace_seconds": 60,
+  "apply": [
+    {
+      "device": "R8",
+      "commands": "configure terminal\ninterface Ethernet0/1\nip ospf 100 area 4\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R8",
+      "commands": "configure terminal\ninterface Ethernet0/1\nip ospf 100 area 3\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:Aug  1 17:32:49.965 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.8 on GigabitEthernet0/0/0/2 in area 3 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000",
+    "*Aug  1 17:32:17.143: %OSPF-5-ADJCHG: Process 100, Nbr 192.0.2.6 on Ethernet0/1 from FULL to DOWN, Neighbor Down: Interface down or detached"
+  ]
+}
