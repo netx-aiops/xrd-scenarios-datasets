@@ -1,0 +1,9 @@
+show running-config router static
+Tue Aug 11 10:58:31.859 UTC
+router static
+ address-family ipv4 unicast
+  192.0.2.3/32 Null0
+ !
+!
+
+RP/0/RP0/CPU0:R2#

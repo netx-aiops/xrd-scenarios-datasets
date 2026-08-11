@@ -43,9 +43,9 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 
 ## Dataset Summary
 
-68 curated network fault scenarios across 7 IOS-XR-based network profiles (topologies,
+69 curated network fault scenarios across 7 IOS-XR-based network profiles (topologies,
 including a mixed IOS-XR/IOS-XE fleet),
-9–10 per profile. Each scenario is a self-contained manifest describing one injected fault,
+9–11 per profile. Each scenario is a self-contained manifest describing one injected fault,
 the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
 and the exact CLI to inject and revert the fault on the live lab.
 

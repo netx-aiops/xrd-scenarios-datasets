@@ -1,0 +1,23 @@
+show cef 192.0.2.3
+Tue Aug 11 11:02:08.295 UTC
+192.0.2.3/32, version 11, internal 0x1000001 0x10 (ptr 0x886fc3f0) [1], 0x400 (0x895fec18), 0x0 (0x0)
+ Updated Aug 11 10:04:39.476 
+ local adjacency to GigabitEthernet0/0/0/0
+
+ Prefix Len 32, traffic index 0, precedence n/a, priority 1
+  gateway array (0x89497be8) reference count 3, flags 0x0, source rib (7), 0 backups
+                [4 type 3 flags 0x8401 (0x8953ae00) ext 0x0 (0x0)]
+  LW-LDI[type=3, refc=1, ptr=0x895fec18, sh-ldi=0x8953ae00]
+  gateway array update type-time 1 Aug 11 10:04:35.316
+ LDI Update time Aug 11 10:04:35.316
+ LW-LDI-TS Aug 11 10:04:39.476
+   via 192.0.0.13/32, GigabitEthernet0/0/0/0, 7 dependencies, weight 0, class 0 [flags 0x0]
+    path-idx 0 NHID 0x1 [0x8a79b320 0x0]
+    next hop 192.0.0.13/32
+    local adjacency
+
+    Load distribution: 0 (refcount 4)
+
+    Hash  OK  Interface                 Address
+    0     Y   GigabitEthernet0/0/0/0    192.0.0.13     
+RP/0/RP0/CPU0:R6#

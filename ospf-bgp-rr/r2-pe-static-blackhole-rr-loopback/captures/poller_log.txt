@@ -1,0 +1,7 @@
+10:59:22 r2_hit=no r3_hit=no
+10:59:43 r2_hit=no r3_hit=no
+11:00:03 r2_hit=no r3_hit=no
+11:00:23 r2_hit=no r3_hit=no
+11:00:44 r2_hit=no r3_hit=no
+11:01:04 r2_hit=yes r3_hit=yes
+BOTH_DOWN_OBSERVED 11:01:04

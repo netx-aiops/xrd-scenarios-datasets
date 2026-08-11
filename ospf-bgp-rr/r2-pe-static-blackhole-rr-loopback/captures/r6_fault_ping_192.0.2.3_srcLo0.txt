@@ -1,0 +1,7 @@
+ping 192.0.2.3 source Loopback0
+Tue Aug 11 11:02:37.571 UTC
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 192.0.2.3 timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5)
+RP/0/RP0/CPU0:R6#

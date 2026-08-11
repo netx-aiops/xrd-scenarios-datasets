@@ -1,0 +1,20 @@
+show cef 192.0.2.3
+Tue Aug 11 10:58:45.572 UTC
+192.0.2.3/32, version 20, attached, null0 adjacency, internal 0x1000041 0x20 (ptr 0x88704060) [1], 0x400 (0x895fec18), 0x0 (0x0)
+ Updated Aug 11 10:58:32.346
+ Prefix Len 32, traffic index 0, precedence n/a, priority 2
+  gateway array (0x89497f00) reference count 1, flags 0x0, source rib (7), 0 backups
+                [2 type 3 flags 0x8401 (0x8953af08) ext 0x0 (0x0)]
+  LW-LDI[type=3, refc=1, ptr=0x895fec18, sh-ldi=0x8953af08]
+  gateway array update type-time 1 Aug 11 10:58:32.346
+ LDI Update time Aug 11 10:58:32.346
+ LW-LDI-TS Aug 11 10:58:32.346
+   via Null0, 3 dependencies, weight 0, class 0 [flags 0x8]
+    path-idx 0 NHID 0x0 [0x88b1b098 0x0]
+     null0 adjacency
+
+    Load distribution: 0 (refcount 2)
+
+    Hash  OK  Interface                 Address
+    0     Y   recursive                 null0          
+RP/0/RP0/CPU0:R2#

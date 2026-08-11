@@ -1,0 +1,9 @@
+show logging | include ADJCHANGE
+Tue Aug 11 11:01:04.169 UTC
+RP/0/RP0/CPU0:Aug 11 10:04:40.056 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.7 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:04:40.929 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:04:42.499 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.6 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:04:45.291 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 11:00:45.499 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.6 Down - BGP Notification sent, hold time expired (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 11:00:52.737 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Down - BGP Notification sent, hold time expired (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:R3#

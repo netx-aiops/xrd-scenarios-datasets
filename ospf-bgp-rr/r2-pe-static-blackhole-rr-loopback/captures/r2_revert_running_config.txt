@@ -1,0 +1,91 @@
+show running-config
+Tue Aug 11 11:03:32.389 UTC
+!! Building configuration...
+!! IOS XR Configuration 26.1.1
+!! Last configuration change at Tue Aug 11 11:03:32 2026 by AI_AGENT_RW
+!
+hostname R2
+logging trap debugging
+logging 100.64.0.2 vrf OOB
+username cisco
+ group root-lr
+ group cisco-support
+ secret 10 $6$e5N9mFqWAh61m...$U8BJxQI2g231adbm/0siDYMr6xY3X./X.rtpy87V/o5HaI21W/C/Fl/8BPHhbtt4GxsMTt5pKD8i.ytYnIaPa0
+!
+username AI_AGENT_RO
+ group root-lr
+ secret 10 $6$ESWkW/b6gM094W/.$GCAvG9/mK03VaM786zaF/zovCPjqePvXndEWQnEy7sMQaBio5B0o8W3ib3pEAZlZGwNyFnW9X9HoSKHiFXOxZ1
+!
+username AI_AGENT_RW
+ group root-lr
+ secret 10 $6$n.m1o/Uw.RDE5o/.$vPqTCji6VMoKUPjplb0fIqn2cYNhbJZm4CNC7F23xXwicHhtrEP4oLcjBIbZ0WcporxN1k2IqQDcIxFQF7xX5/
+!
+vrf OOB
+ address-family ipv4 unicast
+ !
+!
+vty-pool default 0 50
+interface Loopback0
+ ipv4 address 192.0.2.2 255.255.255.255
+!
+interface MgmtEth0/RP0/CPU0/0
+ vrf OOB
+ ipv4 address 100.64.0.102 255.255.255.0
+!
+interface GigabitEthernet0/0/0/0
+ description R2-R3
+ ipv4 address 192.0.0.9 255.255.255.252
+!
+interface GigabitEthernet0/0/0/1
+ description R2-R6
+ ipv4 address 192.0.0.13 255.255.255.252
+!
+interface GigabitEthernet0/0/0/2
+ shutdown
+!
+interface GigabitEthernet0/0/0/3
+ shutdown
+!
+route-policy PASS
+  pass
+end-policy
+!
+router ospf 100
+ router-id 192.0.2.2
+ area 0
+  interface Loopback0
+   passive enable
+  !
+  interface GigabitEthernet0/0/0/0
+  !
+  interface GigabitEthernet0/0/0/1
+  !
+ !
+!
+router bgp 65000
+ bgp router-id 192.0.2.2
+ address-family ipv4 unicast
+  redistribute connected
+ !
+ neighbor 192.0.2.3
+  remote-as 65000
+  update-source Loopback0
+  address-family ipv4 unicast
+   route-policy PASS in
+   route-policy PASS out
+  !
+ !
+ neighbor 192.0.2.7
+  remote-as 65000
+  update-source Loopback0
+  address-family ipv4 unicast
+   route-policy PASS in
+   route-policy PASS out
+  !
+ !
+!
+ssh server v2
+ssh server vrf OOB
+end
+
+RP/0/RP0/CPU0:R2#

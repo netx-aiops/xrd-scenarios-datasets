@@ -1,0 +1,16 @@
+show ospf neighbor
+Tue Aug 11 10:56:25.398 UTC
+
+* Indicates MADJ interface
+# Indicates Neighbor awaiting BFD session up
+
+Neighbors for OSPF 100
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.0.2.3       1     FULL/DR         00:00:39    192.0.0.10      GigabitEthernet0/0/0/0
+    Neighbor is up for 00:52:23
+192.0.2.6       1     FULL/DR         00:00:38    192.0.0.14      GigabitEthernet0/0/0/1
+    Neighbor is up for 00:52:21
+
+Total neighbor count: 2
+RP/0/RP0/CPU0:R2#

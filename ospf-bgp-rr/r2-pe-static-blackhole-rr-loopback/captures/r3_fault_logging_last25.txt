@@ -1,0 +1,37 @@
+show logging last 25
+Tue Aug 11 11:02:48.075 UTC
+Syslog logging: enabled (0 messages dropped, 0 flushes, 0 overruns)
+    Console logging: level warnings, 8 messages logged
+    Monitor logging: level debugging, 0 messages logged
+    Trap logging: level debugging, 11 messages logged
+    Logging to 100.64.0.2, 11 message lines logged
+    Buffer logging: level debugging, 68 messages logged
+
+Log Buffer (2097152 bytes):
+
+RP/0/RP0/CPU0:Aug 11 10:03:52.427 UTC: ifmgr[333]: %PKT_INFRA-LINK-3-UPDOWN : Interface MgmtEth0/RP0/CPU0/0, changed state to Up 
+RP/0/RP0/CPU0:Aug 11 10:03:52.432 UTC: ifmgr[333]: %PKT_INFRA-LINEPROTO-5-UPDOWN : Line protocol on Interface MgmtEth0/RP0/CPU0/0, changed state to Up 
+RP/0/RP0/CPU0:Aug 11 10:03:52.936 UTC: bgp[1084]: %ROUTING-BGP-5-ASYNC_IPC_STATUS : default:(A)inst-id 0, Initial Config Done 
+RP/0/RP0/CPU0:Aug 11 10:03:53.742 UTC: smartlicserver[318]: %LICENSE-SMART_LIC-6-REPORTING_REQUIRED : A Usage report acknowledgement will be required in 90 days. 
+RP/0/RP0/CPU0:Aug 11 10:03:55.900 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key RSA generated, label:the_default, modBits:3072 
+RP/0/RP0/CPU0:Aug 11 10:03:55.906 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ED25519 generated, label:the_default, modBits:256 
+RP/0/RP0/CPU0:Aug 11 10:03:55.929 UTC: cepki[251]: %SECURITY-CEPKI-6-INFO : key database updated successfully 
+RP/0/RP0/CPU0:Aug 11 10:03:55.942 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ECDSA_NISTP256 generated, label:the_default, modBits:256 
+RP/0/RP0/CPU0:Aug 11 10:03:55.958 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ECDSA_NISTP384 generated, label:the_default, modBits:384 
+RP/0/RP0/CPU0:Aug 11 10:03:55.986 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ECDSA_NISTP521 generated, label:the_default, modBits:521 
+RP/0/RP0/CPU0:Aug 11 10:03:55.999 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : Generated keypairs for: rsa ed25519 ecdsa-nistp256 ecdsa-nistp384 ecdsa-nistp521 
+RP/0/RP0/CPU0:Aug 11 10:03:56.147 UTC: config[66321]: %MGBL-CONFIG-6-DB_COMMIT : Configuration committed by user 'ZTP'. Use 'show configuration commit changes 1000000001' to view the changes. 
+RP/0/RP0/CPU0:Aug 11 10:04:00.692 UTC: config[66433]: %MGBL-CONFIG-6-DB_COMMIT : Configuration committed by user 'ZTP'. Use 'show configuration commit changes 1000000002' to view the changes. 
+RP/0/RP0/CPU0:Aug 11 10:04:09.997 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[5022]: Accepted authentication for AI_AGENT_RO from 100.64.0.2 port 44266 ssh2 
+RP/0/RP0/CPU0:Aug 11 10:04:11.398 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[5073]: Accepted authentication for AI_AGENT_RO from 100.64.0.2 port 44274 ssh2 
+RP/0/RP0/CPU0:Aug 11 10:04:30.459 UTC: smartlicserver[318]: %LICENSE-SMART_LIC-3-COMM_FAILED : Communications failure with the Cisco Smart License Utility (CSLU) : Unable to resolve server hostname/domain name  
+RP/0/RP0/CPU0:Aug 11 10:04:34.830 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.4 on GigabitEthernet0/0/0/1 in area 0 from LOADING to FULL, Loading Done, vrf default vrfid 0x60000000 
+RP/0/RP0/CPU0:Aug 11 10:04:37.019 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.2 on GigabitEthernet0/0/0/0 in area 0 from LOADING to FULL, Loading Done, vrf default vrfid 0x60000000 
+RP/0/RP0/CPU0:Aug 11 10:04:40.056 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.7 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:04:40.060 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready 
+RP/0/RP0/CPU0:Aug 11 10:04:40.929 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:04:42.499 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.6 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:04:45.291 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.4 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 11:00:45.499 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.6 Down - BGP Notification sent, hold time expired (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 11:00:52.737 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Down - BGP Notification sent, hold time expired (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:R3#

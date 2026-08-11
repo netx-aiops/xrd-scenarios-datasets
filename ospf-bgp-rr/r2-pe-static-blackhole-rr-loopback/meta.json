@@ -1,0 +1,33 @@
+{
+  "profile": "ospf-bgp-rr",
+  "scenario": "r2-pe-static-blackhole-rr-loopback",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "description": "R2 (PE1) gains a static route 192.0.2.3/32 -> Null0 for the primary RR's\n(R3) loopback. The static (distance 1) overrides the OSPF route (distance\n110) in R2's RIB and CEF installs a null0 (drop) adjacency, so R2\nblackholes ALL traffic destined to 192.0.2.3 while BGP configuration\neverywhere stays intact and the OSPF underlay stays fully up with two\nfeasible paths toward R3 (the direct R2-R3 arm and the long arm via\nR6-R7-R4). Two session pairs die from one device's forwarding state:\nR2's own iBGP session to R3 (R2's TCP segments die at its Null0), and\nR6's iBGP session to R3 (R6's best OSPF path to 192.0.2.3, metric 3,\ntransits R2, so R6's keepalives are dropped in transit at R2 - neither\nendpoint of that pair carries any fault). R3 keeps R4 (direct link,\nnever transits R2) and R7; all PE sessions to R7 (secondary RR) stay up,\nso prefixes still flow via R7.",
+  "target_routers": [
+    "R2"
+  ],
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), a static route 192.0.2.3/32 Null0 was added for R3's loopback, overriding the OSPF route (static distance 1 beats OSPF 110) and installing a drop (Null0) adjacency in R2's forwarding.\nR2 therefore blackholes all packets destined to 192.0.2.3 while the OSPF underlay and its physical paths remain healthy: R2's own iBGP session to the primary RR R3 times out (hold time expired), and R6's iBGP session to R3 also fails because R6's best path to 192.0.2.3 goes through R2 and its BGP packets are dropped in transit at R2.\nSessions unaffected by the blackhole stay up: R3<->R4 (direct link, not via R2) and every PE session to the secondary RR R7.\nFix: remove the static route 192.0.2.3/32 Null0 on 100.64.0.102 (R2).",
+  "expected_symptoms_summary": "BGP session state change (%ROUTING-BGP-5-ADJCHANGE), roughly 2-3 minutes\nafter the change (hold time expired):\n- R3: neighbor 192.0.2.6 Down (Notification sent) and, seconds later,\n  neighbor 192.0.2.2 Down (Notification sent) - both deterministic.\n- R2: neighbor 192.0.2.3 Down (Notification received) - deterministic.\n- R6: neighbor 192.0.2.3 Down (Notification received) - timing-variant:\n  fires only if R3's NOTIFICATION lands on a still-receptive TCP socket\n  at R6 (observed in capture run 1, absent within run 2's window; the\n  R6<->R3 failure itself is always visible via R3's 192.0.2.6 line).",
+  "expected_state_diffs": [],
+  "is_silent": false,
+  "mode": "live",
+  "symptom_capture_grace_seconds": 240,
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter static\naddress-family ipv4 unicast\n192.0.2.3/32 Null0\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nno router static\n"
+    }
+  ],
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:Aug 11 11:00:45.499 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.6 Down - BGP Notification sent, hold time expired (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:Aug 11 11:00:45.506 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Down - BGP Notification received, hold time expired (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:Aug 11 11:00:52.737 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.2 Down - BGP Notification sent, hold time expired (VRF: default) (AS: 65000)",
+    "RP/0/RP0/CPU0:Aug 11 11:00:52.739 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Down - BGP Notification received, hold time expired (VRF: default) (AS: 65000)"
+  ]
+}

@@ -1,0 +1,37 @@
+show logging last 25
+Tue Aug 11 11:02:47.968 UTC
+Syslog logging: enabled (0 messages dropped, 0 flushes, 0 overruns)
+    Console logging: level warnings, 8 messages logged
+    Monitor logging: level debugging, 0 messages logged
+    Trap logging: level debugging, 14 messages logged
+    Logging to 100.64.0.2, 14 message lines logged
+    Buffer logging: level debugging, 71 messages logged
+
+Log Buffer (2097152 bytes):
+
+RP/0/RP0/CPU0:Aug 11 10:03:54.960 UTC: plat_sl_client[312]: %LICENSE-PLAT_CLIENT-6-STATE_CHANGE : Licensing platform state changing from UNKNOWN to ENABLED 
+RP/0/RP0/CPU0:Aug 11 10:03:55.729 UTC: bgp[1084]: %ROUTING-BGP-5-ASYNC_IPC_STATUS : default:(A)inst-id 0, Initial Config Done 
+RP/0/RP0/CPU0:Aug 11 10:03:56.413 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key RSA generated, label:the_default, modBits:3072 
+RP/0/RP0/CPU0:Aug 11 10:03:56.418 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ED25519 generated, label:the_default, modBits:256 
+RP/0/RP0/CPU0:Aug 11 10:03:56.425 UTC: cepki[251]: %SECURITY-CEPKI-6-INFO : key database updated successfully 
+RP/0/RP0/CPU0:Aug 11 10:03:56.428 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ECDSA_NISTP256 generated, label:the_default, modBits:256 
+RP/0/RP0/CPU0:Aug 11 10:03:56.436 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ECDSA_NISTP384 generated, label:the_default, modBits:384 
+RP/0/RP0/CPU0:Aug 11 10:03:56.448 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : crypto key ECDSA_NISTP521 generated, label:the_default, modBits:521 
+RP/0/RP0/CPU0:Aug 11 10:03:56.450 UTC: cepki[251]: %SECURITY-CEPKI-6-KEY_INFO : Generated keypairs for: rsa ed25519 ecdsa-nistp256 ecdsa-nistp384 ecdsa-nistp521 
+RP/0/RP0/CPU0:Aug 11 10:03:56.981 UTC: smartlicserver[318]: %LICENSE-SMART_LIC-6-REPORTING_REQUIRED : A Usage report acknowledgement will be required in 90 days. 
+RP/0/RP0/CPU0:Aug 11 10:03:58.260 UTC: config[66406]: %MGBL-CONFIG-6-DB_COMMIT : Configuration committed by user 'ZTP'. Use 'show configuration commit changes 1000000001' to view the changes. 
+RP/0/RP0/CPU0:Aug 11 10:04:02.692 UTC: config[66526]: %MGBL-CONFIG-6-DB_COMMIT : Configuration committed by user 'ZTP'. Use 'show configuration commit changes 1000000002' to view the changes. 
+RP/0/RP0/CPU0:Aug 11 10:04:09.899 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[5115]: Accepted authentication for AI_AGENT_RO from 100.64.0.2 port 35300 ssh2 
+RP/0/RP0/CPU0:Aug 11 10:04:11.368 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[5169]: Accepted authentication for AI_AGENT_RO from 100.64.0.2 port 35310 ssh2 
+RP/0/RP0/CPU0:Aug 11 10:04:33.090 UTC: smartlicserver[318]: %LICENSE-SMART_LIC-3-COMM_FAILED : Communications failure with the Cisco Smart License Utility (CSLU) : Unable to resolve server hostname/domain name  
+RP/0/RP0/CPU0:Aug 11 10:04:35.056 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.6 on GigabitEthernet0/0/0/1 in area 0 from LOADING to FULL, Loading Done, vrf default vrfid 0x60000000 
+RP/0/RP0/CPU0:Aug 11 10:04:37.016 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.3 on GigabitEthernet0/0/0/0 in area 0 from LOADING to FULL, Loading Done, vrf default vrfid 0x60000000 
+RP/0/RP0/CPU0:Aug 11 10:04:40.927 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:04:40.928 UTC: bgp[1084]: %ROUTING-BGP-5-NSR_STATE_CHANGE : Changed state to Not NSR-Ready 
+RP/0/RP0/CPU0:Aug 11 10:04:52.693 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.7 Up (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 10:58:30.142 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[11488]: Accepted authentication for AI_AGENT_RW from 100.64.0.2 port 40836 ssh2 
+RP/0/RP0/CPU0:Aug 11 10:58:31.435 UTC: config[68885]: %MGBL-CONFIG-6-DB_COMMIT : Configuration committed by user 'AI_AGENT_RW'. Use 'show configuration commit changes 1000000003' to view the changes. 
+RP/0/RP0/CPU0:Aug 11 10:58:31.477 UTC: config[68885]: %MGBL-SYS-5-CONFIG_I : Configured from console by AI_AGENT_RW on vty0 (100.64.0.2) 
+RP/0/RP0/CPU0:Aug 11 11:00:52.739 UTC: bgp[1084]: %ROUTING-BGP-5-ADJCHANGE : neighbor 192.0.2.3 Down - BGP Notification received, hold time expired (VRF: default) (AS: 65000) 
+RP/0/RP0/CPU0:Aug 11 11:02:27.558 UTC: ssh_syslog_proxy[1188]: %SECURITY-SSHD_SYSLOG_PRX-6-INFO_GENERAL : sshd[12016]: Accepted authentication for AI_AGENT_RO from 100.64.0.2 port 54086 ssh2 
+RP/0/RP0/CPU0:R2#

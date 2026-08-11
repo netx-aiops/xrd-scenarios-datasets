@@ -1,0 +1,11 @@
+show route 192.0.2.3
+Tue Aug 11 10:58:45.392 UTC
+
+Routing entry for 192.0.2.3/32
+  Known via "static", distance 1, metric 0 (connected)
+  Installed Aug 11 10:58:32.344 for 00:00:13
+  Routing Descriptor Blocks
+    directly connected, via Null0
+      Route metric is 0
+  No advertising protos. 
+RP/0/RP0/CPU0:R2#

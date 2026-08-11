@@ -1,0 +1,11 @@
+show route 192.0.2.3
+Tue Aug 11 11:02:08.195 UTC
+
+Routing entry for 192.0.2.3/32
+  Known via "ospf 100", distance 110, metric 3, type intra area
+  Installed Aug 11 10:04:39.473 for 00:57:28
+  Routing Descriptor Blocks
+    192.0.0.13, from 192.0.2.3, via GigabitEthernet0/0/0/0
+      Route metric is 3
+  No advertising protos. 
+RP/0/RP0/CPU0:R6#
