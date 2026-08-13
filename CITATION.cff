@@ -11,8 +11,8 @@ type: dataset
 authors:
   - family-names: Koehler
     given-names: Timo
-version: 1.4.0
-date-released: "2026-08-11"
+version: 1.4.1
+date-released: "2026-08-13"
 license: CC-BY-4.0
 repository-code: "https://github.com/netx-aiops/xrd-scenarios-datasets"
 keywords:
