@@ -6,7 +6,7 @@
   "target_routers": [
     "R6"
   ],
-  "expected_rca": "Root cause: on 100.64.0.106 (R6), the OSPF interface MTU on GigabitEthernet0/0/0/0 (the R6<->R2 link, area 0) of 1386 is different to the far end, GigabitEthernet0/0/0/1 on 100.64.0.102 (R2), with 1500.\nBecause the two ends of the link disagree on the interface MTU, database synchronization (the Database Description exchange) cannot complete, so the adjacency never reaches FULL and no routes are exchanged over that link.\nFix: make the MTU on both ends agree (i.e. OSPF MTU 1500; on XR, interface `mtu 1514`).",
+  "expected_rca": "Root cause: on 100.64.0.106 (R6), the OSPF interface MTU on GigabitEthernet0/0/0/0 (the R6<->R2 link, area 0) of 1386 is different to the far end, GigabitEthernet0/0/0/1 on 100.64.0.102 (R2), with 1500.\nFix: make the MTU on both ends agree (i.e. OSPF MTU 1500; on XR, interface `mtu 1514`).",
   "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R6: neighbor 192.0.2.2 on GigabitEthernet0/0/0/0 (area 0) FULL → DOWN reason \"interface down or detached\".",
   "expected_state_diffs": [],
   "is_silent": false,
