@@ -38,28 +38,36 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 - **Language:** English, with IOS-XR CLI / network configuration
 - **License:** CC-BY-4.0 (data & documentation); Apache-2.0 (any bundled code)
 - **Repository:** <https://github.com/netx-aiops/xrd-scenarios-datasets>
-- **Version:** 1.5.0
+- **Version:** 1.4.2
 - **Point of contact:** the repository issue tracker
 
 ## Dataset Summary
 
-70 curated network fault scenarios across 8 IOS-XR-based network profiles (topologies,
-including a mixed IOS-XR/IOS-XE fleet). The established profiles contain 9–11
-scenarios each; the minimal RCA-EVO Stage 2 profile begins with one bounded
-scenario. Each scenario is a self-contained manifest describing one injected fault,
+69 released network fault scenarios across 7 IOS-XR-based network profiles
+(topologies, including a mixed IOS-XR/IOS-XE fleet), 9–11 per profile. Each
+released scenario is a self-contained manifest describing one injected fault,
 the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
 and the exact CLI to inject and revert the fault on the live lab.
 
 | Profile | Focus |
 | --- | --- |
 | `simple-bgp` | OSPF underlay + iBGP PE–PE |
-| `rca_evo_stage2_xrd` | Minimal protocol-isolated OSPF and direct-iBGP RCA-EVO Stage 2 evaluation |
 | `ospf-multi-area-bgp` | multi-area OSPF + eBGP/iBGP + route reflection |
 | `ospf-multi-area-bgp-cdp` | CDP twin of `ospf-multi-area-bgp` — same faults/golds, CDP (not LLDP) as the L2 discovery protocol |
 | `ospf-bgp-rr` | dual route-reflector iBGP |
 | `isis-ipfrr` | IS-IS + TI-LFA fast-reroute |
 | `segment-routing` | IS-IS Segment Routing (SR-MPLS) |
 | `srv6-l3vpn` | SRv6 L3VPN (VPNv4-over-IPv6) |
+
+### Unreleased catalog candidates
+
+The catalog also contains one `rca_evo_stage2_xrd` candidate scenario. Its
+machine-readable `release_status` is `pending-live-verification`, so release
+validation excludes it from the published counts and evaluation/scoring must
+refuse it. The xrd-vlab scenario verifier may apply it in an explicitly
+authorized lab run to capture its actual logging signature. Empty
+`expected_symptoms` in a pending candidate means unknown/not-yet-captured,
+never a silent outcome or released empty gold.
 
 Fault classes span IGP adjacency (area / MTU / authentication / hello-timer /
 circuit-type), BGP session and policy (AS mismatch, update-source,
@@ -117,6 +125,7 @@ Each `meta.json` is a self-contained scenario manifest:
 | `apply`, `revert` | the exact IOS-XR CLI to inject / undo the fault on the live lab |
 | `mode`, `is_silent` | delivery mode (`live`); whether the fault is log-silent |
 | `symptom_capture_grace_seconds` | the symptom-capture window for the ground-truth verifier (`xrd-vlab scripts/scenario_verify.py`): after the FIRST new syslog appears post-apply, keep collecting this many seconds before concluding the capture. Some faults have a **staggered** symptom distribution — an immediate local event plus a protocol-timer-driven peer event (e.g. `r3-r2-passive-interface`: the passive end logs at config time, the peer's dead-timer ADJCHG lands ~40 s later) — and a too-short window would observe only the first line and silently under-represent the gold. The window travels with the scenario so re-verification never depends on an operator remembering a flag; an explicit `--grace` on the verifier CLI overrides it. 60 s covers one OSPF dead interval with margin. |
+| `release_status` | optional candidate gate; absent means released for backward compatibility, while `pending-live-verification` forbids evaluation/scoring until live gold capture and review are complete |
 
 The **input** an agent is given is `(profile, question)` only; every other field
 is held out as ground truth. `expected_rca` is the single field the scoring metric
@@ -227,7 +236,8 @@ The dataset follows semantic versioning:
 - **minor** — added scenarios or backward-compatible fields;
 - **major** — changed gold labels, changed scoring semantics, or removed scenarios.
 
-Current release: **v1.5.0**.
+Current release: **v1.4.2**. Pending catalog candidates are not part of this
+release and are excluded from its counts.
 
 ## Citation
 
@@ -236,7 +246,7 @@ Current release: **v1.5.0**.
   title     = {XRd Scenario Datasets: Autonomous Network RCA Evaluation Golds},
   author    = {Koehler, Timo},
   year      = {2026},
-  version   = {1.5.0},
+  version   = {1.4.2},
   license   = {CC-BY-4.0},
   url       = {https://github.com/netx-aiops/xrd-scenarios-datasets}
 }
@@ -258,5 +268,5 @@ give appropriate credit, link the license, and indicate changes. See
 
 Suggested attribution:
 
-> XRd Scenario Datasets v1.5.0, created by Timo Koehler (netx-aiops), licensed
+> XRd Scenario Datasets v1.4.2, created by Timo Koehler (netx-aiops), licensed
 > under CC-BY-4.0.

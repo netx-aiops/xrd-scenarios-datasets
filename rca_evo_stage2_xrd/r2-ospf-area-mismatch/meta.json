@@ -29,6 +29,7 @@
     }
   ],
   "mode": "live",
+  "release_status": "pending-live-verification",
   "is_silent": false,
   "symptom_capture_grace_seconds": 60
 }

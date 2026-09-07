@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release validation: the published counts must match the manifests on disk.
+"""Release validation: published counts must match released manifests on disk.
 
 Reviewer-mandated release check (2026-07-14, rides the v1.2.0 release): the
 v1.0.0 CITATION shipped claiming "70 scenarios" while the tree held 66 — the
@@ -10,9 +10,8 @@ comparison. Run it before tagging any release:
 
 Checks (stdlib-only, exit 1 on any mismatch):
   * every */*/meta.json parses as JSON and names its own profile/scenario dirs;
-  * scenario count on disk == the count in CITATION.cff's abstract;
-  * profile count on disk == the count in CITATION.cff's abstract;
-  * scenario count on disk == the count in README.md;
+  * released scenario/profile counts == the counts in CITATION.cff and README;
+  * pending-live-verification candidates have no asserted logging gold;
   * CITATION version is semver-shaped and date-released is a valid ISO date.
 """
 from __future__ import annotations
@@ -36,7 +35,8 @@ def main() -> None:
     errors: list[str] = []
 
     manifests = sorted(ROOT.glob("*/*/meta.json"))
-    profiles = sorted({m.parents[1].name for m in manifests})
+    released: list[Path] = []
+    pending: list[Path] = []
     for m in manifests:
         try:
             data = json.loads(m.read_text())
@@ -44,25 +44,57 @@ def main() -> None:
             errors.append(f"{m.relative_to(ROOT)}: invalid JSON ({e})")
             continue
         if data.get("profile") != m.parents[1].name:
-            errors.append(f"{m.relative_to(ROOT)}: profile field "
-                          f"{data.get('profile')!r} != directory {m.parents[1].name!r}")
+            errors.append(
+                f"{m.relative_to(ROOT)}: profile field "
+                f"{data.get('profile')!r} != directory {m.parents[1].name!r}"
+            )
         if data.get("scenario") != m.parents[0].name:
-            errors.append(f"{m.relative_to(ROOT)}: scenario field "
-                          f"{data.get('scenario')!r} != directory {m.parents[0].name!r}")
+            errors.append(
+                f"{m.relative_to(ROOT)}: scenario field "
+                f"{data.get('scenario')!r} != directory {m.parents[0].name!r}"
+            )
+        status = data.get("release_status", "released")
+        if status == "released":
+            released.append(m)
+        elif status == "pending-live-verification":
+            pending.append(m)
+            if data.get("expected_symptoms") != []:
+                errors.append(
+                    f"{m.relative_to(ROOT)}: pending candidate must not assert "
+                    "expected_symptoms"
+                )
+            if data.get("is_silent") is not False:
+                errors.append(
+                    f"{m.relative_to(ROOT)}: pending candidate cannot assert a silent outcome"
+                )
+        else:
+            errors.append(
+                f"{m.relative_to(ROOT)}: unsupported release_status {status!r}"
+            )
+
+    released_profiles = sorted({m.parents[1].name for m in released})
 
     citation = (ROOT / "CITATION.cff").read_text()
-    m_count = re.search(r"(\d+)\s+Cisco IOS-XR/IOS-XE network fault scenarios", citation)
+    m_count = re.search(
+        r"(\d+)\s+Cisco IOS-XR/IOS-XE network fault scenarios", citation
+    )
     m_prof = re.search(r"across\s+(\d+)\s+topology profiles", citation)
     m_ver = re.search(r"^version:\s*([0-9]+\.[0-9]+\.[0-9]+)\s*$", citation, re.M)
-    m_date = re.search(r'^date-released:\s*"([0-9]{4}-[0-9]{2}-[0-9]{2})"\s*$', citation, re.M)
-    if not m_count or int(m_count.group(1)) != len(manifests):
-        errors.append(f"CITATION.cff scenario count "
-                      f"{m_count.group(1) if m_count else '<missing>'} "
-                      f"!= {len(manifests)} manifests on disk")
-    if not m_prof or int(m_prof.group(1)) != len(profiles):
-        errors.append(f"CITATION.cff profile count "
-                      f"{m_prof.group(1) if m_prof else '<missing>'} "
-                      f"!= {len(profiles)} profile dirs on disk")
+    m_date = re.search(
+        r'^date-released:\s*"([0-9]{4}-[0-9]{2}-[0-9]{2})"\s*$', citation, re.M
+    )
+    if not m_count or int(m_count.group(1)) != len(released):
+        errors.append(
+            f"CITATION.cff scenario count "
+            f"{m_count.group(1) if m_count else '<missing>'} "
+            f"!= {len(released)} released manifests on disk"
+        )
+    if not m_prof or int(m_prof.group(1)) != len(released_profiles):
+        errors.append(
+            f"CITATION.cff profile count "
+            f"{m_prof.group(1) if m_prof else '<missing>'} "
+            f"!= {len(released_profiles)} released profile dirs on disk"
+        )
     if not m_ver:
         errors.append("CITATION.cff version missing or not semver")
     if not m_date:
@@ -74,16 +106,22 @@ def main() -> None:
             errors.append(f"CITATION.cff date-released invalid: {m_date.group(1)}")
 
     readme = (ROOT / "README.md").read_text()
-    m_readme = re.search(r"(\d+)\s+curated network fault scenarios", readme)
-    if not m_readme or int(m_readme.group(1)) != len(manifests):
-        errors.append(f"README.md scenario count "
-                      f"{m_readme.group(1) if m_readme else '<missing>'} "
-                      f"!= {len(manifests)} manifests on disk")
+    m_readme = re.search(r"(\d+)\s+released network fault scenarios", readme)
+    if not m_readme or int(m_readme.group(1)) != len(released):
+        errors.append(
+            f"README.md scenario count "
+            f"{m_readme.group(1) if m_readme else '<missing>'} "
+            f"!= {len(released)} released manifests on disk"
+        )
 
     if errors:
         fail(errors)
-    print(f"OK: {len(manifests)} scenarios / {len(profiles)} profiles; "
-          f"CITATION v{m_ver.group(1)} ({m_date.group(1)}) and README agree with disk.")
+    print(
+        f"OK: {len(released)} released scenarios / "
+        f"{len(released_profiles)} released profiles; {len(pending)} pending; "
+        f"CITATION v{m_ver.group(1)} ({m_date.group(1)}) "
+        "and README agree with released disk state."
+    )
 
 
 if __name__ == "__main__":
