@@ -1,0 +1,34 @@
+{
+  "profile": "rca_evo_stage2_xrd",
+  "scenario": "r2-ospf-area-mismatch",
+  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
+  "target_routers": [
+    "R2"
+  ],
+  "description": "R2 moves both OSPF process 100 interfaces from area 0 to area 1 while R0 keeps the shared R0-R2 link in area 0. The area mismatch prevents the adjacency from remaining FULL, so neither router learns the other router's Loopback0 route. The independent direct-iBGP R3-R4 pair remains unchanged.",
+  "expected_rca": "Root cause: on 100.64.0.102 (R2), OSPF process 100 was changed so Loopback0 and GigabitEthernet0/0/0/3 belong to area 1 instead of area 0, while R0 keeps its side of the shared link in area 0. The two link endpoints therefore advertise different OSPF area IDs and cannot maintain an adjacency, so R0 and R2 stop exchanging their Loopback0 routes. Fix: move R2's Loopback0 and GigabitEthernet0/0/0/3 assignments back to OSPF area 0.",
+  "expected_symptoms": [],
+  "expected_symptoms_summary": "Pending live scenario verification. The exact captured OSPF adjacency-change and area-mismatch log set must be populated before this catalog addition is released.",
+  "expected_state_diffs": [
+    "R2 `show running-config router ospf 100`: Loopback0 and GigabitEthernet0/0/0/3 are under area 1 (baseline: both are under area 0).",
+    "R0/R2 `show ospf neighbor detail`: the R0-R2 adjacency is not FULL after the mutation (baseline: FULL).",
+    "R0 `show route ipv4 unicast 192.0.2.2/32`: the R2 Loopback0 OSPF route is absent after the mutation (baseline: present).",
+    "R2 `show route ipv4 unicast 192.0.2.0/32`: the R0 Loopback0 OSPF route is absent after the mutation (baseline: present).",
+    "R3/R4 `show bgp ipv4 unicast summary`: the independent direct-iBGP session remains Established, and R4 retains the BGP route for 192.0.2.3/32."
+  ],
+  "apply": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter ospf 100\n area 0\n  no interface Loopback0\n  no interface GigabitEthernet0/0/0/3\n area 1\n  interface Loopback0\n   passive enable\n  interface GigabitEthernet0/0/0/3\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R2",
+      "commands": "configure terminal\nrouter ospf 100\n area 1\n  no interface Loopback0\n  no interface GigabitEthernet0/0/0/3\n area 0\n  interface Loopback0\n   passive enable\n  interface GigabitEthernet0/0/0/3\n"
+    }
+  ],
+  "mode": "live",
+  "is_silent": false,
+  "symptom_capture_grace_seconds": 60
+}

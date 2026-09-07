@@ -38,20 +38,22 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 - **Language:** English, with IOS-XR CLI / network configuration
 - **License:** CC-BY-4.0 (data & documentation); Apache-2.0 (any bundled code)
 - **Repository:** <https://github.com/netx-aiops/xrd-scenarios-datasets>
-- **Version:** 1.1.0
+- **Version:** 1.5.0
 - **Point of contact:** the repository issue tracker
 
 ## Dataset Summary
 
-69 curated network fault scenarios across 7 IOS-XR-based network profiles (topologies,
-including a mixed IOS-XR/IOS-XE fleet),
-9–11 per profile. Each scenario is a self-contained manifest describing one injected fault,
+70 curated network fault scenarios across 8 IOS-XR-based network profiles (topologies,
+including a mixed IOS-XR/IOS-XE fleet). The established profiles contain 9–11
+scenarios each; the minimal RCA-EVO Stage 2 profile begins with one bounded
+scenario. Each scenario is a self-contained manifest describing one injected fault,
 the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
 and the exact CLI to inject and revert the fault on the live lab.
 
 | Profile | Focus |
 | --- | --- |
 | `simple-bgp` | OSPF underlay + iBGP PE–PE |
+| `rca_evo_stage2_xrd` | Minimal protocol-isolated OSPF and direct-iBGP RCA-EVO Stage 2 evaluation |
 | `ospf-multi-area-bgp` | multi-area OSPF + eBGP/iBGP + route reflection |
 | `ospf-multi-area-bgp-cdp` | CDP twin of `ospf-multi-area-bgp` — same faults/golds, CDP (not LLDP) as the L2 discovery protocol |
 | `ospf-bgp-rr` | dual route-reflector iBGP |
@@ -225,7 +227,7 @@ The dataset follows semantic versioning:
 - **minor** — added scenarios or backward-compatible fields;
 - **major** — changed gold labels, changed scoring semantics, or removed scenarios.
 
-Current release: **v1.1.0**.
+Current release: **v1.5.0**.
 
 ## Citation
 
@@ -234,7 +236,7 @@ Current release: **v1.1.0**.
   title     = {XRd Scenario Datasets: Autonomous Network RCA Evaluation Golds},
   author    = {Koehler, Timo},
   year      = {2026},
-  version   = {1.1.0},
+  version   = {1.5.0},
   license   = {CC-BY-4.0},
   url       = {https://github.com/netx-aiops/xrd-scenarios-datasets}
 }
@@ -256,5 +258,5 @@ give appropriate credit, link the license, and indicate changes. See
 
 Suggested attribution:
 
-> XRd Scenario Datasets v1.1.0, created by Timo Koehler (netx-aiops), licensed
+> XRd Scenario Datasets v1.5.0, created by Timo Koehler (netx-aiops), licensed
 > under CC-BY-4.0.
