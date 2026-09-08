@@ -38,13 +38,13 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 - **Language:** English, with IOS-XR CLI / network configuration
 - **License:** CC-BY-4.0 (data & documentation); Apache-2.0 (any bundled code)
 - **Repository:** <https://github.com/netx-aiops/xrd-scenarios-datasets>
-- **Version:** 1.4.2
+- **Version:** 1.5.0
 - **Point of contact:** the repository issue tracker
 
 ## Dataset Summary
 
-69 released network fault scenarios across 7 IOS-XR-based network profiles
-(topologies, including a mixed IOS-XR/IOS-XE fleet), 9–11 per profile. Each
+70 released network fault scenarios across 8 IOS-XR-based network profiles
+(topologies, including a mixed IOS-XR/IOS-XE fleet). Each
 released scenario is a self-contained manifest describing one injected fault,
 the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
 and the exact CLI to inject and revert the fault on the live lab.
@@ -58,16 +58,17 @@ and the exact CLI to inject and revert the fault on the live lab.
 | `isis-ipfrr` | IS-IS + TI-LFA fast-reroute |
 | `segment-routing` | IS-IS Segment Routing (SR-MPLS) |
 | `srv6-l3vpn` | SRv6 L3VPN (VPNv4-over-IPv6) |
+| `rca_evo_stage2_xrd` | bounded RCA-EVO Stage 2 OSPF-area intervention with an independent direct-iBGP control domain |
 
-### Unreleased catalog candidates
+### RCA-EVO Stage 2 scenario
 
-The catalog also contains one `rca_evo_stage2_xrd` candidate scenario. Its
-machine-readable `release_status` is `pending-live-verification`, so release
-validation excludes it from the published counts and evaluation/scoring must
-refuse it. The xrd-vlab scenario verifier may apply it in an explicitly
-authorized lab run to capture its actual logging signature. Empty
-`expected_symptoms` in a pending candidate means unknown/not-yet-captured,
-never a silent outcome or released empty gold.
+The `rca_evo_stage2_xrd/r2-ospf-area-mismatch` scenario was promoted only after
+two independent 60-second all-router captures produced the same
+timestamp-normalized five-line logging signature. The verifier observed the
+bilateral adjacency loss and the capped R2 area-ID mismatch messages, found no
+unexpected R8/R9 lines, and proved a ready empty scenario stack after each
+revert. Its RCA and state-diff gold remain quarantined from experimental-agent
+inputs by the RCA-EVO execution contract.
 
 Fault classes span IGP adjacency (area / MTU / authentication / hello-timer /
 circuit-type), BGP session and policy (AS mismatch, update-source,
@@ -125,7 +126,7 @@ Each `meta.json` is a self-contained scenario manifest:
 | `apply`, `revert` | the exact IOS-XR CLI to inject / undo the fault on the live lab |
 | `mode`, `is_silent` | delivery mode (`live`); whether the fault is log-silent |
 | `symptom_capture_grace_seconds` | the symptom-capture window for the ground-truth verifier (`xrd-vlab scripts/scenario_verify.py`): after the FIRST new syslog appears post-apply, keep collecting this many seconds before concluding the capture. Some faults have a **staggered** symptom distribution — an immediate local event plus a protocol-timer-driven peer event (e.g. `r3-r2-passive-interface`: the passive end logs at config time, the peer's dead-timer ADJCHG lands ~40 s later) — and a too-short window would observe only the first line and silently under-represent the gold. The window travels with the scenario so re-verification never depends on an operator remembering a flag; an explicit `--grace` on the verifier CLI overrides it. 60 s covers one OSPF dead interval with margin. |
-| `release_status` | optional candidate gate; absent means released for backward compatibility, while `pending-live-verification` forbids evaluation/scoring until live gold capture and review are complete |
+| `release_status` | optional release gate; absent or `released` means available for evaluation, while `pending-live-verification` forbids evaluation/scoring until live gold capture and review are complete |
 
 The **input** an agent is given is `(profile, question)` only; every other field
 is held out as ground truth. `expected_rca` is the single field the scoring metric

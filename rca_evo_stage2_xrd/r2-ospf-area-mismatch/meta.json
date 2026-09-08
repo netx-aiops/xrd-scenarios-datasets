@@ -7,8 +7,14 @@
   ],
   "description": "R2 moves both OSPF process 100 interfaces from area 0 to area 1 while R0 keeps the shared R0-R2 link in area 0. The area mismatch prevents the adjacency from remaining FULL, so neither router learns the other router's Loopback0 route. The independent direct-iBGP R3-R4 pair remains unchanged.",
   "expected_rca": "Root cause: on 100.64.0.102 (R2), OSPF process 100 was changed so Loopback0 and GigabitEthernet0/0/0/3 belong to area 1 instead of area 0, while R0 keeps its side of the shared link in area 0. The two link endpoints therefore advertise different OSPF area IDs and cannot maintain an adjacency, so R0 and R2 stop exchanging their Loopback0 routes. Fix: move R2's Loopback0 and GigabitEthernet0/0/0/3 assignments back to OSPF area 0.",
-  "expected_symptoms": [],
-  "expected_symptoms_summary": "Pending live scenario verification. The exact captured OSPF adjacency-change and area-mismatch log set must be populated before this catalog addition is released.",
+  "expected_symptoms": [
+    "RP/0/RP0/CPU0:Sep  8 18:59:50.863 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.2 on GigabitEthernet0/0/0/1 in area 0 from FULL to DOWN, Neighbor Down: dead timer expired, vrf default vrfid 0x60000000",
+    "RP/0/RP0/CPU0:Sep  8 18:59:11.550 UTC: ospf[1035]: %ROUTING-OSPF-5-ADJCHG : Process 100, Nbr 192.0.2.0 on GigabitEthernet0/0/0/3 in area 0 from FULL to DOWN, Neighbor Down: interface down or detached, vrf default vrfid 0x60000000",
+    "RP/0/RP0/CPU0:Sep  8 18:59:14.125 UTC: ospf[1035]: %ROUTING-OSPF-4-ERRRCV : Received invalid packet: mismatch area ID, from backbone area must be virtual-link but not found from 192.0.0.1, GigabitEthernet0/0/0/3",
+    "RP/0/RP0/CPU0:Sep  8 18:59:32.921 UTC: ospf[1035]: %ROUTING-OSPF-4-ERRRCV : Received invalid packet: mismatch area ID, from backbone area must be virtual-link but not found from 192.0.0.1, GigabitEthernet0/0/0/3",
+    "RP/0/RP0/CPU0:Sep  8 18:59:51.920 UTC: ospf[1035]: %ROUTING-OSPF-4-ERRRCV : Received invalid packet: mismatch area ID, from backbone area must be virtual-link but not found from 192.0.0.1, GigabitEthernet0/0/0/3"
+  ],
+  "expected_symptoms_summary": "OSPF adjacency state change (%ROUTING-OSPF-5-ADJCHG):\n- R0: neighbor 192.0.2.2 on GigabitEthernet0/0/0/1 (area 0) FULL → DOWN reason \"dead timer expired\".\n- R2: neighbor 192.0.2.0 on GigabitEthernet0/0/0/3 (area 0) FULL → DOWN reason \"interface down or detached\".\n- Bilateral: both ends (R0, R2) report the transition.\n\nOSPF packet receive error (%ROUTING-OSPF-4-ERRRCV):\n- R2: mismatch area ID from peer 192.0.0.1 on GigabitEthernet0/0/0/3.\n- R2: mismatch area ID from peer 192.0.0.1 on GigabitEthernet0/0/0/3.\n- R2: mismatch area ID from peer 192.0.0.1 on GigabitEthernet0/0/0/3.\n",
   "expected_state_diffs": [
     "R2 `show running-config router ospf 100`: Loopback0 and GigabitEthernet0/0/0/3 are under area 1 (baseline: both are under area 0).",
     "R0/R2 `show ospf neighbor detail`: the R0-R2 adjacency is not FULL after the mutation (baseline: FULL).",
@@ -29,7 +35,7 @@
     }
   ],
   "mode": "live",
-  "release_status": "pending-live-verification",
+  "release_status": "released",
   "is_silent": false,
   "symptom_capture_grace_seconds": 60
 }
