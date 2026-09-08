@@ -19,13 +19,13 @@
   "apply": [
     {
       "device": "R2",
-      "commands": "configure terminal\nrouter ospf 100\n area 0\n  no interface Loopback0\n  no interface GigabitEthernet0/0/0/3\n area 1\n  interface Loopback0\n   passive enable\n  interface GigabitEthernet0/0/0/3\n"
+      "commands": "configure terminal\nrouter ospf 100\n no area 0\n area 1\n  interface Loopback0\n   passive enable\n  interface GigabitEthernet0/0/0/3\n"
     }
   ],
   "revert": [
     {
       "device": "R2",
-      "commands": "configure terminal\nrouter ospf 100\n area 1\n  no interface Loopback0\n  no interface GigabitEthernet0/0/0/3\n area 0\n  interface Loopback0\n   passive enable\n  interface GigabitEthernet0/0/0/3\n"
+      "commands": "configure terminal\nrouter ospf 100\n no area 1\n area 0\n  interface Loopback0\n   passive enable\n  interface GigabitEthernet0/0/0/3\n"
     }
   ],
   "mode": "live",
