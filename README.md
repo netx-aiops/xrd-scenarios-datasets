@@ -43,6 +43,28 @@ never the answer. Its RCA is then scored against an engineer-written gold.
 
 ## Dataset Summary
 
+### Current deployment scope
+
+The current xrd-vlab deployment runs R0-R7 (IOS-XR/XRd) only in both RCA-AX
+and RCA-EVO modes. R8/R9 IOL nodes are retired because they do not support
+NETCONF/YANG; VM-based replacements exceed the server's resource budget.
+The `ospf-multi-area-bgp` baseline no longer includes their area-3 links or
+BGP peers. Other profiles already used only R0-R7 for active protocol roles.
+
+`ospf-multi-area-bgp/r8-r6-xe-area-mismatch` now declares
+`deployment_status: retired` and is excluded from live execution/evaluation.
+Its original fault commands and gold labels are retained as historical
+evidence. Deployment status is separate from release status: historical
+release counts below are unchanged, but only 69 of the 70 released scenarios
+are eligible for the current eight-router lab. Pending scenarios remain
+pending; this migration does not qualify or regenerate their gold labels.
+Consumers must honor deployment status and reject dependencies on R8/R9,
+including apply/revert blocks, peer addresses, and expected observations.
+
+Retained labels for the modified profile are not a claim of fresh live
+requalification on the reduced topology. Requalification must use the normal
+capture-and-review workflow, without changing expectations merely to pass.
+
 70 released network fault scenarios across 8 IOS-XR-based network profiles
 (topologies, including a mixed IOS-XR/IOS-XE fleet). Each
 released scenario is a self-contained manifest describing one injected fault,

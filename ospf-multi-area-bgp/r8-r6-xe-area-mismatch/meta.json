@@ -1,4 +1,6 @@
 {
+  "deployment_status": "retired",
+  "deployment_disabled_reason": "Requires R8 IOS-XE/IOL, retired from xrd-vlab because IOL lacks NETCONF/YANG and VM replacements exceed the server resource budget. Historical fault and gold labels are preserved, not translated to XRd.",
   "profile": "ospf-multi-area-bgp",
   "scenario": "r8-r6-xe-area-mismatch",
   "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
