@@ -1,0 +1,25 @@
+{
+  "profile": "topology_scoped_qualification",
+  "scenario": "vlan-subinterface-down",
+  "description": "Disable the VLAN subinterface while retaining its physical parent and separate discovery evidence.",
+  "mode": "live",
+  "release_status": "pending-live-verification",
+  "target_routers": [
+    "R6"
+  ],
+  "apply": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1.100\n shutdown\nexit\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R6",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1.100\n no shutdown\nexit\n"
+    }
+  ],
+  "expected_symptoms": [],
+  "expected_symptoms_summary": "",
+  "expected_rca": ""
+}

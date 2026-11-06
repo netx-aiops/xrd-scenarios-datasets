@@ -25,271 +25,40 @@ source_datasets:
 - original
 ---
 
-# Dataset Card for XRd Scenario Datasets
+# XRd scenario datasets
 
-Gold-standard benchmark for evaluating **autonomous network root-cause-analysis
-(RCA) agents** against a **live IOS-XR (XRd) network**. Each scenario injects a
-single, real fault — a configuration change applied to a running multi-router lab
-— and asks an agent to identify the root cause from live telemetry alone. The
-agent is **ground-truth-blind**: it sees only the network and a generic question,
-never the answer. Its RCA is then scored against an engineer-written gold.
+Evaluation manifests for controlled XRd fault tests. Each profile/scenario's
+`meta.json` contains its question, expected answer/observations and apply/revert
+recipe. Keep all golds, targets and recipes on the evaluator side, outside RCA
+inputs. This is evaluation data, not model-training material.
 
-- **Curated by:** Timo Koehler (netx-aiops)
-- **Language:** English, with IOS-XR CLI / network configuration
-- **License:** CC-BY-4.0 (data & documentation); Apache-2.0 (any bundled code)
-- **Repository:** <https://github.com/netx-aiops/xrd-scenarios-datasets>
-- **Version:** 1.5.0
-- **Point of contact:** the repository issue tracker
+Curated by Timo Koehler (netx-aiops). Data/documentation are CC-BY-4.0; bundled
+code is Apache-2.0. Preserve attribution, source captures and license files.
 
-## Dataset Summary
+## Use and qualify
 
-### Current deployment scope
+Clone beside xrd-vlab and use its [evaluation workflow](../xrd-vlab/gui/README.md).
+Fault execution requires authorized lab ownership, the matching active profile,
+verified baseline and guarded restoration. A score does not establish causal
+correctness, protocol completeness or successful network restoration.
 
-The current xrd-vlab deployment runs R0-R7 (IOS-XR/XRd) only in both RCA-AX
-and RCA-EVO modes. R8/R9 IOL nodes are retired because they do not support
-NETCONF/YANG; VM-based replacements exceed the server's resource budget.
-The `ospf-multi-area-bgp` baseline no longer includes their area-3 links or
-BGP peers. Other profiles already used only R0-R7 for active protocol roles.
+Honor release and `deployment_status` separately. The current lab uses R0–R7;
+retired R8/R9 cases remain historical and must not execute. Retained labels do not
+imply fresh qualification after a topology change. Silent scenarios may have no
+syslog trigger; missing logs do not prove no fault.
 
-`ospf-multi-area-bgp/r8-r6-xe-area-mismatch` now declares
-`deployment_status: retired` and is excluded from live execution/evaluation.
-Its original fault commands and gold labels are retained as historical
-evidence. Deployment status is separate from release status: historical
-release counts below are unchanged, but only 69 of the 70 released scenarios
-are eligible for the current eight-router lab. Pending scenarios remain
-pending; this migration does not qualify or regenerate their gold labels.
-Consumers must honor deployment status and reject dependencies on R8/R9,
-including apply/revert blocks, peer addresses, and expected observations.
+Keep profile/trajectory families together when assigning evaluation splits.
+The CDP profile duplicates the LLDP twin's faults/golds and is not an independent
+fault population. Record prior artifact contact; do not tune on held-out golds or
+relabel development results as independent evaluation.
 
-Retained labels for the modified profile are not a claim of fresh live
-requalification on the reduced topology. Requalification must use the normal
-capture-and-review workflow, without changing expectations merely to pass.
+## Maintain
 
-70 released network fault scenarios across 8 IOS-XR-based network profiles
-(topologies, including a mixed IOS-XR/IOS-XE fleet). Each
-released scenario is a self-contained manifest describing one injected fault,
-the ground-truth-blind question posed to the agent, the engineer-written gold RCA,
-and the exact CLI to inject and revert the fault on the live lab.
+Follow [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md). Review
+source captures, exact scope, timing and restoration before promoting a scenario.
+Changes to gold labels require maintainer sign-off and versioned provenance;
+do not revise frozen expectations merely because an agent disagrees.
 
-| Profile | Focus |
-| --- | --- |
-| `simple-bgp` | OSPF underlay + iBGP PE–PE |
-| `ospf-multi-area-bgp` | multi-area OSPF + eBGP/iBGP + route reflection |
-| `ospf-multi-area-bgp-cdp` | CDP twin of `ospf-multi-area-bgp` — same faults/golds, CDP (not LLDP) as the L2 discovery protocol |
-| `ospf-bgp-rr` | dual route-reflector iBGP |
-| `isis-ipfrr` | IS-IS + TI-LFA fast-reroute |
-| `segment-routing` | IS-IS Segment Routing (SR-MPLS) |
-| `srv6-l3vpn` | SRv6 L3VPN (VPNv4-over-IPv6) |
-| `rca_evo_stage2_xrd` | bounded RCA-EVO Stage 2 OSPF-area intervention with an independent direct-iBGP control domain |
-
-### RCA-EVO Stage 2 scenario
-
-The `rca_evo_stage2_xrd/r2-ospf-area-mismatch` scenario was promoted only after
-two independent 60-second all-router captures produced the same
-timestamp-normalized five-line logging signature. The verifier observed the
-bilateral adjacency loss and the capped R2 area-ID mismatch messages, found no
-unexpected R8/R9 lines, and proved a ready empty scenario stack after each
-revert. Its RCA and state-diff gold remain quarantined from experimental-agent
-inputs by the RCA-EVO execution contract.
-
-Fault classes span IGP adjacency (area / MTU / authentication / hello-timer /
-circuit-type), BGP session and policy (AS mismatch, update-source,
-route-reflector-client, route-policy, TCP-MD5), and SR / SRv6 (prefix-SID
-conflict, SRGB shift, locator prefix). Several faults are **silent** — no fault
-syslog fires and the ground truth lives in the operational state diff — to test
-agents that must reason beyond the log stream.
-
-Transparency note: `ospf-multi-area-bgp-cdp` (added in v1.1.0) duplicates the
-`ospf-multi-area-bgp` faults and golds verbatim on a lab twin whose only delta
-is the L2 discovery protocol (CDP enabled, LLDP absent — the Cisco-only
-operator model). It probes an agent's topology-discovery robustness, not new
-fault classes; aggregate scores that treat every scenario as independent
-should weight it accordingly.
-
-## Supported Tasks and Intended Use
-
-The primary task is **agentic network root-cause-analysis evaluation**. This
-dataset is intended for:
-
-1. evaluating an RCA agent's final root-cause answer against a gold;
-2. measuring semantic fact coverage (recall) and claim support (precision);
-3. regression-testing RCA pipelines across releases;
-4. comparing prompt, planner, memory, retrieval, and tool-use strategies;
-5. probing state-diff reasoning via the silent (no-syslog) scenarios.
-
-It is an **evaluation** dataset, **not** intended for model pretraining or
-fine-tuning.
-
-## Out-of-Scope Use
-
-- training production models without explicit permission;
-- claiming vendor coverage beyond IOS-XR / the documented profiles;
-- evaluating general networking knowledge outside the included scenarios;
-- security, exploit, or offensive network-automation benchmarking;
-- evaluation of real customer environments without additional validation.
-
-## Dataset Structure
-
-```
-<profile>/<scenario>/meta.json
-```
-
-Each `meta.json` is a self-contained scenario manifest:
-
-| Field | Meaning |
-| --- | --- |
-| `profile`, `scenario` | identity |
-| `question` | the ground-truth-blind prompt shown to the agent |
-| `expected_rca` | **the gold** — engineer-written root cause / mechanism / fix; the label the metric scores against |
-| `target_routers` | the device(s) carrying the injected fault |
-| `description` | human notes on the fault and its mechanism |
-| `expected_symptoms`, `expected_symptoms_summary` | the syslog signature the fault produces |
-| `expected_state_diffs` | expected operational state changes (where captured) |
-| `apply`, `revert` | the exact IOS-XR CLI to inject / undo the fault on the live lab |
-| `mode`, `is_silent` | delivery mode (`live`); whether the fault is log-silent |
-| `symptom_capture_grace_seconds` | the symptom-capture window for the ground-truth verifier (`xrd-vlab scripts/scenario_verify.py`): after the FIRST new syslog appears post-apply, keep collecting this many seconds before concluding the capture. Some faults have a **staggered** symptom distribution — an immediate local event plus a protocol-timer-driven peer event (e.g. `r3-r2-passive-interface`: the passive end logs at config time, the peer's dead-timer ADJCHG lands ~40 s later) — and a too-short window would observe only the first line and silently under-represent the gold. The window travels with the scenario so re-verification never depends on an operator remembering a flag; an explicit `--grace` on the verifier CLI overrides it. 60 s covers one OSPF dead interval with margin. |
-| `release_status` | optional release gate; absent or `released` means available for evaluation, while `pending-live-verification` forbids evaluation/scoring until live gold capture and review are complete |
-
-The **input** an agent is given is `(profile, question)` only; every other field
-is held out as ground truth. `expected_rca` is the single field the scoring metric
-grades against.
-
-Example (`ospf-multi-area-bgp/r4-ebgp-r5-multihop-removed`):
-
-```json
-{
-  "profile": "ospf-multi-area-bgp",
-  "scenario": "r4-ebgp-r5-multihop-removed",
-  "question": "Identify the root cause of the network fault: which device, what changed, and why it breaks.",
-  "target_routers": ["R4"],
-  "expected_rca": "Root cause: on 100.64.0.104 (R4), `ebgp-multihop` was removed from the R5 eBGP neighbor (192.0.2.5).\nBecause R4 peers with R5 over its loopback, without multihop the BGP packets are sent with TTL=1 and are dropped before reaching R5 when the loopback path is more than one IP hop, so the eBGP session cannot be established and no routes are exchanged.\nFix: restore `ebgp-multihop` on R4's R5 neighbor.",
-  "apply":  [{ "device": "R4", "commands": "router bgp 65000\n neighbor 192.0.2.5\n  no ebgp-multihop\n" }],
-  "revert": [{ "device": "R4", "commands": "router bgp 65000\n neighbor 192.0.2.5\n  ebgp-multihop 255\n" }]
-}
-```
-
-## Scoring Protocol
-
-The scoring **contract** is what makes this a benchmark rather than a file dump.
-An agent's answer is graded against `expected_rca` by a **decompositional
-semantic fact-coverage** metric:
-
-1. the gold `expected_rca` is decomposed into distinct root-cause **facts**;
-2. **recall** = fraction of gold facts the answer covers;
-3. **precision** = fraction of the answer's claims supported by the gold;
-4. the headline score is the **F1** of mean precision and mean recall, averaged
-   over `K` independent judge samples (reference default `K=3`, temperature `0`).
-
-The judge is conditioned on a ground-truth-blind restatement of the question, so
-it never sees the fault label directly. Unsupported causal claims cost precision;
-missing required root-cause facts cost recall.
-
-The reference implementation is the `rca_eval` semantic-F1 metric used by the
-netx-aiops RCA harness; any decompositional semantic recall/precision judge over
-`expected_rca` reproduces the contract. Benchmark reports **must** disclose the
-judge model, version, and `K`.
-
-### Answer conventions (identifier matching)
-
-Golds are written in the identifiers an agent actually observes on-box:
-
-- devices are IOS-XR routers `R0`–`R7`, each with management IP `100.64.0.10N`
-  (e.g. `R4` → `100.64.0.104`). The **root-cause device** is named by its
-  management IP with the hostname annotated, e.g. `100.64.0.104 (R4)`;
-- **neighbors / peers** are named by their peering address (loopback or link IP),
-  as an agent reads them from configuration and protocol state.
-
-## Splits and Leakage Policy
-
-This is an **evaluation-only** benchmark: there is no `train` split, and the
-scenarios are intended to be treated as a sealed test set for reporting.
-
-If the dataset is used for prompt optimization, retrieval tuning, symbolic-rule tuning, 
-or judge calibration, the scenarios used for tuning **must be reported as a development split**, 
-not as sealed held-out performance.
-**Do not tune on a scenario and then report its score as zero-shot.**
-
-## Dataset Creation
-
-### Source Data and Provenance
-
-Scenarios are **synthetic / lab-generated** on a live IOS-XR (XRd) testbed run
-under containerlab. No production or customer data is included. For each scenario
-the `apply` / `revert` blocks are the exact CLI that injects and undoes the fault
-on the running lab, so every gold is reproducible against the live network.
-
-### Annotations
-
-Gold answers are **engineer-written** root cause / mechanism / fix statements,
-grounded in the injected change and standard protocol behaviour. Golds are
-symptom-free (the syslog signature is captured separately in
-`expected_symptoms`). Gold `expected_rca` text has been **recalibrated to
-agent-observable identifiers** (management-IP device naming; premise clauses
-folded into mechanism) so that the fact-coverage metric measures diagnostic
-correctness rather than identifier style — see `git log` for the exact,
-auditable recalibration diff.
-
-## Known Limitations
-
-- **Single vendor:** IOS-XR only; no cross-vendor coverage.
-- **Bounded topology space:** 7 profiles, 8-router labs; limited multi-fault and
-  ambiguous cases.
-- **Prose-first gold:** the gold is a human-readable `expected_rca` (plus a
-  symptom signature). It does **not yet** ship the fuller "gold in three layers"
-  (atomic gold-fact table + expected-diagnostic-action table) recommended for
-  agentic benchmarks — see Roadmap.
-- **Judge dependence:** the semantic-F1 metric depends on a judge model; absolute
-  scores are only comparable within a fixed judge / `K` configuration.
-
-## Roadmap
-
-Planned, to strengthen the scoring contract (per gold-eval best practice):
-
-1. an **atomic gold-fact table** per scenario (required / optional / forbidden
-   facts with weights and evidence), enabling fact-level F1 and hallucination
-   penalties independent of a judge;
-2. an **expected-diagnostic-action table** (required / acceptable / forbidden
-   tool actions), enabling required-action recall and unsafe-action penalties.
-
-## Versioning
-
-The dataset follows semantic versioning:
-
-- **patch** — typo / metadata fixes, non-semantic cleanup;
-- **minor** — added scenarios or backward-compatible fields;
-- **major** — changed gold labels, changed scoring semantics, or removed scenarios.
-
-Current release: **v1.4.2**. Pending catalog candidates are not part of this
-release and are excluded from its counts.
-
-## Citation
-
-```bibtex
-@dataset{xrd_scenarios_datasets_2026,
-  title     = {XRd Scenario Datasets: Autonomous Network RCA Evaluation Golds},
-  author    = {Koehler, Timo},
-  year      = {2026},
-  version   = {1.4.2},
-  license   = {CC-BY-4.0},
-  url       = {https://github.com/netx-aiops/xrd-scenarios-datasets}
-}
-```
-
-See also [`CITATION.cff`](CITATION.cff).
-
-## License
-
-- **Data, gold labels, and documentation** are licensed under
-  **Creative Commons Attribution 4.0 International (CC-BY-4.0)** —
-  `SPDX-License-Identifier: CC-BY-4.0`.
-- **Any bundled code / scripts** are licensed under **Apache-2.0** —
-  `SPDX-License-Identifier: Apache-2.0`.
-
-You are free to share and adapt the data, including commercially, provided you
-give appropriate credit, link the license, and indicate changes. See
-[`LICENSE`](LICENSE) for the full notice.
-
-Suggested attribution:
-
-> XRd Scenario Datasets v1.4.2, created by Timo Koehler (netx-aiops), licensed
-> under CC-BY-4.0.
+Use the shared [RCA scorer](../rca-ax/eval/README.md) with recorded model/scorer
+versions for comparisons. Keep capture notes and artifacts as qualification
+provenance; deployment retirement does not rewrite their original observations.
