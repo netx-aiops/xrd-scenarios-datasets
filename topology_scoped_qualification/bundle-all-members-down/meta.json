@@ -1,0 +1,25 @@
+{
+  "profile": "topology_scoped_qualification",
+  "scenario": "bundle-all-members-down",
+  "description": "Disable both local bundle members; retain down member evidence without inferring absence.",
+  "mode": "live",
+  "release_status": "pending-live-verification",
+  "target_routers": [
+    "R4"
+  ],
+  "apply": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n shutdown\nexit\ninterface GigabitEthernet0/0/0/3\n shutdown\nexit\n"
+    }
+  ],
+  "revert": [
+    {
+      "device": "R4",
+      "commands": "configure terminal\ninterface GigabitEthernet0/0/0/1\n no shutdown\nexit\ninterface GigabitEthernet0/0/0/3\n no shutdown\nexit\n"
+    }
+  ],
+  "expected_symptoms": [],
+  "expected_symptoms_summary": "",
+  "expected_rca": ""
+}
